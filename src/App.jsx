@@ -240,6 +240,79 @@ export default function App() {
     }
   };
 
+  // Calculate average forgetting curve projection over a 7-day period
+  const retentionCurveData = useMemo(() => {
+    const points = [];
+    const now = new Date();
+    const totalCards = activeUnloadedWords.length || 1;
+
+    // Project average retention from Today (Day 0) to Day 6
+    for (let d = 0; d < 7; d++) {
+      let sumRetention = 0;
+      activeUnloadedWords.forEach(w => {
+        const prog = userProgressMap[w.id];
+        if (!prog || prog.repetitions === 0) {
+          sumRetention += 0; // Unstudied cards have 0% retention
+        } else {
+          const lastDate = prog.lastReviewedDate ? new Date(prog.lastReviewedDate) : new Date();
+          const elapsedMs = now.getTime() + d * 24 * 60 * 60 * 1000 - lastDate.getTime();
+          const elapsedDays = Math.max(0, elapsedMs / (24 * 60 * 60 * 1000));
+          const interval = prog.interval || 1;
+          const strength = interval * 1.6;
+          const ret = Math.exp(-elapsedDays / strength);
+          sumRetention += ret;
+        }
+      });
+      const avgRetention = Math.round((sumRetention / totalCards) * 100);
+      points.push(avgRetention);
+    }
+    return points;
+  }, [activeUnloadedWords, userProgressMap]);
+
+  // Construct SVG paths for the retention line and gradient area
+  const svgPaths = useMemo(() => {
+    const W = 280;
+    const H = 85;
+    if (retentionCurveData.length === 0) return { line: '', fill: '' };
+
+    let linePath = '';
+    retentionCurveData.forEach((val, idx) => {
+      const x = idx * (W / 6);
+      const y = H - (val * (H / 100));
+      if (idx === 0) {
+        linePath += `M ${x} ${y}`;
+      } else {
+        linePath += ` L ${x} ${y}`;
+      }
+    });
+
+    const fillPath = `${linePath} L ${W} ${H} L 0 ${H} Z`;
+    return { line: linePath, fill: fillPath };
+  }, [retentionCurveData]);
+
+  // Compute summary stats for the active vocabulary
+  const activeStatsSummary = useMemo(() => {
+    const total = activeUnloadedWords.length;
+    const mastered = activeUnloadedWords.filter(w => {
+      const p = userProgressMap[w.id];
+      return p && p.status === 'mastered';
+    }).length;
+    const learning = activeUnloadedWords.filter(w => {
+      const p = userProgressMap[w.id];
+      return p && (p.status === 'learning' || p.status === 'review');
+    }).length;
+    const unseen = total - mastered - learning;
+    const currentRetention = retentionCurveData[0] || 0;
+
+    return {
+      total,
+      mastered,
+      learning,
+      unseen,
+      currentRetention
+    };
+  }, [activeUnloadedWords, userProgressMap, retentionCurveData]);
+
   // Current Card
   const currentCard = sessionDeck[currentIndex] || null;
   const currentProgress = currentCard ? (userProgressMap[currentCard.id] || DEFAULT_SM2_CARD) : DEFAULT_SM2_CARD;
@@ -375,66 +448,159 @@ export default function App() {
       {/* THREE-COLUMN GRID LAYOUT */}
       <div className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch my-2 overflow-y-auto lg:overflow-hidden w-full">
         {/* Left Column: Stats & Filters (col-span-3) */}
-        <div className="lg:col-span-3 lg:h-full flex flex-col gap-3 shrink-0 justify-start">
-          {/* Quick Stats Grid */}
-          <div className="grid grid-cols-2 gap-2.5 shrink-0">
-            <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800 flex items-center gap-2.5">
-              <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
-                <Clock className="w-4 h-4" />
+        <div className="lg:col-span-3 lg:h-full flex flex-col justify-between p-4 rounded-2xl glass-panel overflow-hidden shrink-0 gap-4">
+          <div className="space-y-4 flex flex-col overflow-hidden">
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-2 gap-2 shrink-0">
+              <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800/60 flex items-center gap-2">
+                <Clock className="w-4 h-4 text-amber-400 shrink-0" />
+                <div>
+                  <div className="text-base font-extrabold text-white leading-tight">{stats.dueToday}</div>
+                  <div className="text-[9px] font-bold text-slate-400">Due Today</div>
+                </div>
               </div>
-              <div>
-                <div className="text-lg font-extrabold text-white leading-tight">{stats.dueToday}</div>
-                <div className="text-[10px] font-bold text-slate-400">Due Today</div>
+
+              <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800/60 flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div>
+                  <div className="text-base font-extrabold text-white leading-tight">{stats.mastered}</div>
+                  <div className="text-[9px] font-bold text-slate-400">Mastered</div>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800/60 flex items-center gap-2">
+                <Brain className="w-4 h-4 text-indigo-400 shrink-0" />
+                <div>
+                  <div className="text-base font-extrabold text-white leading-tight">{stats.learning}</div>
+                  <div className="text-[9px] font-bold text-slate-400">In Progress</div>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800/60 flex items-center gap-2">
+                <Flame className="w-4 h-4 text-rose-400 shrink-0" />
+                <div>
+                  <div className="text-base font-extrabold text-white leading-tight">{stats.streak} Days</div>
+                  <div className="text-[9px] font-bold text-slate-400">Streak</div>
+                </div>
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800 flex items-center gap-2.5">
-              <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
-                <CheckCircle className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="text-lg font-extrabold text-white leading-tight">{stats.mastered}</div>
-                <div className="text-[10px] font-bold text-slate-400">Mastered</div>
-              </div>
+            {/* Chunk Selector */}
+            <ChunkSelector
+              chunks={unlockedChunks}
+              selectedChunk={selectedChunk}
+              setSelectedChunk={setSelectedChunk}
+              studyModeFilter={studyModeFilter}
+              setStudyModeFilter={setStudyModeFilter}
+              totalWords={activeUnloadedWords.length}
+              currentChunkCount={sessionDeck.length}
+            />
+          </div>
+
+          {/* Learning Progress / Retention Dashboard Card */}
+          <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800/60 flex flex-col justify-between gap-2 overflow-hidden flex-grow">
+            <div className="flex items-center justify-between shrink-0">
+              <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Trophy className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
+                <span>Retention Rate</span>
+              </h3>
+              <span className="text-[10px] font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md">
+                Avg: {activeStatsSummary.currentRetention}%
+              </span>
             </div>
 
-            <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800 flex items-center gap-2.5">
-              <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
-                <Brain className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="text-lg font-extrabold text-white leading-tight">{stats.learning}</div>
-                <div className="text-[10px] font-bold text-slate-400">In Progress</div>
-              </div>
+            {/* SVG Graph Area */}
+            <div className="relative bg-slate-950/60 rounded-lg p-2 border border-slate-950 flex-grow flex items-center justify-center min-h-[90px] overflow-hidden">
+              {activeUnloadedWords.length === 0 || activeStatsSummary.currentRetention === 0 ? (
+                <div className="text-center text-[10px] text-slate-500 font-semibold py-6">
+                  No vocabulary words learned yet.
+                </div>
+              ) : (
+                <svg viewBox="0 0 280 85" className="w-full h-full overflow-visible">
+                  <defs>
+                    <linearGradient id="retention-grad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="rgb(99, 102, 241)" stopOpacity="0.2" />
+                      <stop offset="100%" stopColor="rgb(99, 102, 241)" stopOpacity="0.0" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Horizontal Grid lines */}
+                  <line x1="0" y1="0" x2="280" y2="0" stroke="rgba(255,255,255,0.03)" strokeDasharray="3,3" />
+                  <line x1="0" y1="42.5" x2="280" y2="42.5" stroke="rgba(255,255,255,0.03)" strokeDasharray="3,3" />
+                  <line x1="0" y1="85" x2="280" y2="85" stroke="rgba(255,255,255,0.05)" />
+
+                  {/* Shaded Area */}
+                  {svgPaths.fill && (
+                    <path d={svgPaths.fill} fill="url(#retention-grad)" />
+                  )}
+
+                  {/* Glowing Line Path */}
+                  {svgPaths.line && (
+                    <path
+                      d={svgPaths.line}
+                      fill="none"
+                      stroke="rgb(99, 102, 241)"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="drop-shadow-[0_0_4px_rgba(99,102,241,0.4)]"
+                    />
+                  )}
+
+                  {/* SVG Dots on points */}
+                  {retentionCurveData.map((val, idx) => {
+                    const x = idx * (280 / 6);
+                    const y = 85 - (val * (85 / 100));
+                    return (
+                      <circle
+                        key={idx}
+                        cx={x}
+                        cy={y}
+                        r="3"
+                        fill="rgb(99, 102, 241)"
+                        stroke="#030712"
+                        strokeWidth="1"
+                        title={`Day ${idx}: ${val}%`}
+                      />
+                    );
+                  })}
+                </svg>
+              )}
             </div>
 
-            <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800 flex items-center gap-2.5">
-              <div className="p-2 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 shrink-0">
-                <Flame className="w-4 h-4" />
+            {/* X-Axis labels */}
+            <div className="flex justify-between items-center text-[9px] text-slate-500 font-bold px-1 shrink-0">
+              <span>Today</span>
+              <span>Day 3</span>
+              <span>Day 6</span>
+            </div>
+
+            {/* Legend details */}
+            <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-slate-400 font-semibold pt-1.5 border-t border-slate-900 shrink-0">
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                <span>Mastered: <strong>{activeStatsSummary.mastered}</strong></span>
               </div>
-              <div>
-                <div className="text-lg font-extrabold text-white leading-tight">{stats.streak} Days</div>
-                <div className="text-[10px] font-bold text-slate-400">Streak</div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
+                <span>Review: <strong>{activeStatsSummary.learning}</strong></span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-600 shrink-0" />
+                <span>Unseen: <strong>{activeStatsSummary.unseen}</strong></span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0" />
+                <span>Retention: <strong>{activeStatsSummary.currentRetention}%</strong></span>
               </div>
             </div>
           </div>
-
-          {/* Chunk Selector */}
-          <ChunkSelector
-            chunks={unlockedChunks}
-            selectedChunk={selectedChunk}
-            setSelectedChunk={setSelectedChunk}
-            studyModeFilter={studyModeFilter}
-            setStudyModeFilter={setStudyModeFilter}
-            totalWords={activeUnloadedWords.length}
-            currentChunkCount={sessionDeck.length}
-          />
         </div>
 
         {/* Center Column: Card View (col-span-6) */}
-        <div className="lg:col-span-6 lg:h-full flex flex-col justify-center items-center overflow-hidden py-2 shrink-0">
+        <div className="lg:col-span-6 lg:h-full flex flex-col justify-start items-center p-4 rounded-2xl glass-panel overflow-hidden shrink-0 gap-3 lg:pt-3">
           {currentCard ? (
-            <div className="w-full flex flex-col justify-center items-center gap-2">
+            <div className="w-full flex flex-col justify-start items-center gap-3 animate-fade-in flex-grow">
               <div className="flex items-center justify-between w-full max-w-xl text-xs text-slate-400 px-2 shrink-0">
                 <span className="font-semibold">Card {currentIndex + 1} of {sessionDeck.length}</span>
                 <button
@@ -474,7 +640,7 @@ export default function App() {
                 })}
               </div>
 
-              <div className="w-full shrink-0">
+              <div className="w-full shrink-0 flex-grow flex items-center justify-center">
                 <Flashcard
                   card={currentCard}
                   progress={currentProgress}
@@ -485,7 +651,7 @@ export default function App() {
               </div>
             </div>
           ) : (
-            <div className="p-8 rounded-3xl glass-card text-center space-y-4 max-w-md mx-auto my-auto shadow-xl shrink-0">
+            <div className="p-8 rounded-3xl bg-slate-900/10 border border-slate-800/40 text-center space-y-4 max-w-md mx-auto my-auto shadow-xl shrink-0">
               <div className="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto">
                 <Trophy className="w-7 h-7" />
               </div>
@@ -519,7 +685,7 @@ export default function App() {
         </div>
 
         {/* Right Column: Chunk Manager (col-span-3) */}
-        <div className="lg:col-span-3 lg:h-full flex flex-col bg-slate-900/20 border border-slate-800/80 p-3 rounded-2xl overflow-hidden shrink-0 justify-between gap-3">
+        <div className="lg:col-span-3 lg:h-full flex flex-col justify-between p-4 rounded-2xl glass-panel overflow-hidden shrink-0 gap-3">
           <div className="flex flex-col overflow-hidden flex-grow">
             <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between shrink-0 mb-1">
               <span>Learning Chunk Manager</span>
@@ -540,7 +706,7 @@ export default function App() {
                     className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl border text-[11px] font-semibold cursor-pointer transition-all duration-200 select-none ${
                       isUnlocked
                         ? 'bg-indigo-600/15 border-indigo-500/20 text-white'
-                        : 'bg-slate-900/40 border-slate-800/40 text-slate-500 hover:text-slate-350 hover:border-slate-700'
+                        : 'bg-slate-900/40 border-slate-800/40 text-slate-500 hover:text-slate-355 hover:border-slate-700'
                     }`}
                   >
                     <input
