@@ -94,6 +94,7 @@ export default function ChunkSelector({
           {[
             { value: 'ALL', label: 'All' },
             { value: 'NEW', label: 'New' },
+            { value: 'DUE', label: 'Due' },
             { value: 'STUDIED', label: 'Studied' }
           ].map((option) => (
             <button

@@ -196,6 +196,10 @@ export default function App() {
       const isNew = !prog || prog.repetitions === 0;
       if (studyModeFilter === 'NEW') return isNew;
       if (studyModeFilter === 'STUDIED') return !isNew;
+      if (studyModeFilter === 'DUE') {
+        const isDue = prog && new Date(prog.nextReviewDate).getTime() <= new Date().getTime();
+        return !isNew && isDue;
+      }
       return true;
     });
 
