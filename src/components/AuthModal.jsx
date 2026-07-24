@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Mail, Lock, LogIn, UserPlus, AlertCircle, CloudCheck } from 'lucide-react';
+import { X, Mail, Lock, LogIn, UserPlus, AlertCircle, Cloud } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
@@ -71,7 +71,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
 
         <div className="text-center mb-6">
           <div className="w-12 h-12 rounded-2xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center mx-auto mb-3">
-            <CloudCheck className="w-6 h-6" />
+            <Cloud className="w-6 h-6" />
           </div>
           <h3 className="text-2xl font-bold text-white">
             {isSignUp ? 'Create WordSmart Account' : 'Welcome Back'}
@@ -90,7 +90,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
 
         {message && (
           <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-start gap-2">
-            <CloudCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+            <Cloud className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
             <span>{message}</span>
           </div>
         )}

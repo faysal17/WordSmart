@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flame, Brain, CheckCircle, Clock, Database, CloudCheck, User, LogOut } from 'lucide-react';
+import { Flame, Brain, CheckCircle, Clock, Database, Cloud, User, LogOut } from 'lucide-react';
 
 export default function StatsHeader({ stats, user, onOpenAuth, onOpenGuide, onLogout }) {
   return (
@@ -32,7 +32,7 @@ export default function StatsHeader({ stats, user, onOpenAuth, onOpenGuide, onLo
                 <div className="text-xs">
                   <p className="font-semibold text-slate-200">{user.email}</p>
                   <span className="text-[10px] text-emerald-400 flex items-center gap-1">
-                    <CloudCheck className="w-3 h-3" /> Cloud Synced
+                    <Cloud className="w-3 h-3" /> Cloud Synced
                   </span>
                 </div>
               </div>
