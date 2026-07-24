@@ -37,7 +37,8 @@ const EMBEDDED_SAMPLE_CSV = `Chunk,Word,Pronunciation,Part of Speech,Definition,
 
 export async function loadVocabularyCSV() {
   try {
-    const response = await fetch('/wordsmart_vocabulary_chunks.csv');
+    // Append a cache-buster query parameter to force loading the latest CSV file
+    const response = await fetch('/wordsmart_vocabulary_chunks.csv?t=' + Date.now());
     if (response.ok) {
       const csvText = await response.text();
       return parseCSVText(csvText);
