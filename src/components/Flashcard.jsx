@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, Sparkles, Award, Clock, Eye, MessageSquare, Plus, X } from 'lucide-react';
+import { Volume2, Sparkles, Award, Clock, Eye, MessageSquare, Plus, X, Pencil, Trash2 } from 'lucide-react';
 
 export default function Flashcard({ 
   card, 
@@ -8,14 +8,32 @@ export default function Flashcard({
   isFlipped, 
   setIsFlipped,
   userSentences = [],
-  onAddUserSentence
+  onAddUserSentence,
+  onEditUserSentence,
+  onDeleteUserSentence
 }) {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showSentences, setShowSentences] = useState(false);
+  const [editingIndex, setEditingIndex] = useState(-1);
+  const [editText, setEditText] = useState('');
 
-  // Always reset to standard answer view when card changes or when flip state changes
+  const handleStartEdit = (idx, text) => {
+    setEditingIndex(idx);
+    setEditText(text);
+  };
+
+  const handleSaveEdit = (idx) => {
+    if (editText.trim() && onEditUserSentence) {
+      onEditUserSentence(userSentences[idx], editText.trim());
+    }
+    setEditingIndex(-1);
+  };
+
+  // Always reset to standard answer view and close editor when card changes or when flip state changes
   useEffect(() => {
     setShowSentences(false);
+    setEditingIndex(-1);
+    setEditText('');
   }, [card.id, isFlipped]);
 
   const speakWord = (e) => {
@@ -177,9 +195,67 @@ export default function Flashcard({
 
                         {/* Custom User Sentences */}
                         {userSentences.map((sentence, idx) => (
-                          <div key={idx} className="p-3 rounded-xl bg-emerald-950/20 border border-emerald-500/10 text-xs text-emerald-200 leading-relaxed font-medium">
-                            <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">My Example</span>
-                            {sentence}
+                          <div 
+                            key={idx} 
+                            className="group relative p-3 rounded-xl bg-emerald-950/20 border border-emerald-500/10 text-xs text-emerald-200 leading-relaxed font-medium flex items-center justify-between gap-3 min-h-[44px]"
+                          >
+                            {editingIndex === idx ? (
+                              <form 
+                                onSubmit={(e) => {
+                                  e.preventDefault();
+                                  handleSaveEdit(idx);
+                                }}
+                                className="flex items-center gap-1.5 w-full"
+                              >
+                                <input
+                                  type="text"
+                                  value={editText}
+                                  onChange={(e) => setEditText(e.target.value)}
+                                  className="flex-grow px-2 py-1 rounded bg-slate-950 border border-emerald-500/40 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-500 min-w-0"
+                                  autoFocus
+                                />
+                                <button
+                                  type="submit"
+                                  className="p-1 rounded bg-emerald-600 text-white hover:bg-emerald-500 transition cursor-pointer shrink-0"
+                                  title="Save Changes"
+                                >
+                                  <Plus className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingIndex(-1)}
+                                  className="p-1 rounded bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200 transition cursor-pointer shrink-0"
+                                  title="Cancel"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </form>
+                            ) : (
+                              <>
+                                <div className="flex-grow min-w-0">
+                                  <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-widest block mb-0.5">My Example</span>
+                                  <span className="block break-words">{sentence}</span>
+                                </div>
+                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity shrink-0 ml-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStartEdit(idx, sentence)}
+                                    className="p-1 rounded text-emerald-400 hover:bg-emerald-950 hover:text-emerald-300 transition cursor-pointer"
+                                    title="Edit sentence"
+                                  >
+                                    <Pencil className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => onDeleteUserSentence(sentence)}
+                                    className="p-1 rounded text-rose-400 hover:bg-rose-950/20 hover:text-rose-350 transition cursor-pointer"
+                                    title="Delete sentence"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </>
+                            )}
                           </div>
                         ))}
                       </div>

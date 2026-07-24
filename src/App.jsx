@@ -377,6 +377,71 @@ export default function App() {
     }
   };
 
+  // Edit custom user sentence
+  const handleEditUserSentence = async (wordId, oldText, newText) => {
+    const cleanNewText = newText.trim();
+    if (!cleanNewText || cleanNewText === oldText) return;
+
+    setUserSentences(prev => {
+      const wordSentences = prev[wordId] || [];
+      const updatedSentences = wordSentences.map(s => s === oldText ? cleanNewText : s);
+      const updated = {
+        ...prev,
+        [wordId]: updatedSentences
+      };
+
+      if (!user) {
+        localStorage.setItem('wordsmart_user_sentences', JSON.stringify(updated));
+      }
+
+      return updated;
+    });
+
+    if (user && isSupabaseConfigured && supabase) {
+      try {
+        await supabase
+          .from('user_sentences')
+          .update({ sentence: cleanNewText })
+          .eq('user_id', user.id)
+          .eq('word_id', wordId)
+          .eq('sentence', oldText);
+      } catch (err) {
+        console.error('Failed to update sentence in Supabase:', err);
+      }
+    }
+  };
+
+  // Delete custom user sentence
+  const handleDeleteUserSentence = async (wordId, sentenceText) => {
+    setUserSentences(prev => {
+      const wordSentences = prev[wordId] || [];
+      const updatedSentences = wordSentences.filter(s => s !== sentenceText);
+      const updated = {
+        ...prev,
+        [wordId]: updatedSentences
+      };
+
+      if (!user) {
+        localStorage.setItem('wordsmart_user_sentences', JSON.stringify(updated));
+      }
+
+      return updated;
+    });
+
+    if (user && isSupabaseConfigured && supabase) {
+      try {
+        await supabase
+          .from('user_sentences')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('word_id', wordId)
+          .eq('sentence', sentenceText);
+      } catch (err) {
+        console.error('Failed to delete sentence from Supabase:', err);
+      }
+    }
+  };
+
   // Available unique chunks
   const availableChunks = useMemo(() => {
     const chunkSet = new Set(words.map(w => w.chunk));
@@ -893,6 +958,8 @@ export default function App() {
                   setIsFlipped={setIsFlipped}
                   userSentences={userSentences[currentCard.id] || []}
                   onAddUserSentence={(sentence) => handleAddUserSentence(currentCard.id, sentence)}
+                  onEditUserSentence={(oldText, newText) => handleEditUserSentence(currentCard.id, oldText, newText)}
+                  onDeleteUserSentence={(sentenceText) => handleDeleteUserSentence(currentCard.id, sentenceText)}
                 />
               </div>
             </div>
