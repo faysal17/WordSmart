@@ -11,65 +11,62 @@ export default function ChunkSelector({
   currentChunkCount
 }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl glass-panel border border-slate-800">
-      <div className="flex flex-wrap items-center gap-6">
-        {/* Chunk Select */}
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
-            <Layers className="w-5 h-5" />
-          </div>
-          <div>
-            <label htmlFor="chunk-select" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-              Study Chunk Filter
-            </label>
-            <div className="flex items-center gap-2">
-              <select
-                id="chunk-select"
-                value={selectedChunk}
-                onChange={(e) => setSelectedChunk(e.target.value)}
-                className="bg-slate-900 text-white font-medium text-sm rounded-xl px-3 py-1.5 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent cursor-pointer"
-              >
-                <option value="ALL">All Chunks ({totalWords} words)</option>
-                {chunks.map((chunkNum) => (
-                  <option key={chunkNum} value={chunkNum}>
-                    Chunk {chunkNum}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+    <div className="p-3.5 rounded-2xl bg-slate-900/20 border border-slate-800/80 space-y-3">
+      {/* Chunk Select */}
+      <div className="flex items-center gap-2.5">
+        <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 shrink-0">
+          <Layers className="w-4 h-4" />
         </div>
-
-        {/* Card Status Filter */}
-        <div className="flex flex-col gap-1">
-          <span className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-            Card Status Filter
-          </span>
-          <div className="flex bg-slate-900/80 p-1 rounded-xl border border-slate-800">
-            {[
-              { value: 'ALL', label: 'All' },
-              { value: 'NEW', label: 'New' },
-              { value: 'STUDIED', label: 'Studied' }
-            ].map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setStudyModeFilter(option.value)}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
-                  studyModeFilter === option.value
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                {option.label}
-              </button>
+        <div className="flex-grow">
+          <label htmlFor="chunk-select" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
+            Study Chunk Filter
+          </label>
+          <select
+            id="chunk-select"
+            value={selectedChunk}
+            onChange={(e) => setSelectedChunk(e.target.value)}
+            className="w-full bg-slate-900 text-white font-semibold text-xs rounded-lg px-2.5 py-1.5 border border-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+          >
+            <option value="ALL">All Active ({totalWords} words)</option>
+            {chunks.map((chunkNum) => (
+              <option key={chunkNum} value={chunkNum}>
+                Chunk {chunkNum}
+              </option>
             ))}
-          </div>
+          </select>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 text-xs font-medium text-slate-400 bg-slate-900/60 px-3.5 py-2 rounded-xl border border-slate-800">
-        <Filter className="w-4 h-4 text-indigo-400" />
+      {/* Card Status Filter */}
+      <div className="space-y-1">
+        <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+          Card Status Filter
+        </span>
+        <div className="flex bg-slate-900 p-0.5 rounded-lg border border-slate-800">
+          {[
+            { value: 'ALL', label: 'All' },
+            { value: 'NEW', label: 'New' },
+            { value: 'STUDIED', label: 'Studied' }
+          ].map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setStudyModeFilter(option.value)}
+              className={`flex-1 py-1 rounded-md text-[11px] font-bold transition-all duration-150 ${
+                studyModeFilter === option.value
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-205'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Active set status info */}
+      <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 bg-slate-900/60 px-2.5 py-1.5 rounded-lg border border-slate-800">
+        <Filter className="w-3.5 h-3.5 text-indigo-400" />
         <span>Active Set: <strong className="text-white">{currentChunkCount}</strong> cards</span>
       </div>
     </div>

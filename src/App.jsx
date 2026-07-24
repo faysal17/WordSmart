@@ -346,9 +346,9 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between p-4 sm:p-6 md:p-8 max-w-6xl mx-auto font-['Plus_Jakarta_Sans',sans-serif]">
+    <div className="min-h-screen lg:h-screen bg-slate-950 text-slate-100 flex flex-col justify-between p-3 md:p-4 max-w-7xl mx-auto font-['Plus_Jakarta_Sans',sans-serif] lg:overflow-hidden">
       {/* HEADER & USER BAR */}
-      <div>
+      <div className="shrink-0">
         <StatsHeader
           user={user}
           onOpenAuth={() => setIsAuthModalOpen(true)}
@@ -357,14 +357,14 @@ export default function App() {
         />
 
         {!user && !isSupabaseConfigured && (
-          <div className="mb-4 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between animate-fade-in">
+          <div className="mb-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] flex items-center justify-between animate-fade-in shrink-0">
             <div className="flex items-center gap-2">
-              <CloudOff className="w-4 h-4 text-amber-400 shrink-0" />
+              <CloudOff className="w-3.5 h-3.5 text-amber-400 shrink-0" />
               <span>Demo Mode: Cloud sync is inactive. Configure Supabase environment variables to persist across devices.</span>
             </div>
             <button
               onClick={() => setIsGuideModalOpen(true)}
-              className="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 font-semibold transition"
+              className="px-2 py-0.5 rounded-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 font-semibold transition text-[10px]"
             >
               Guide
             </button>
@@ -372,49 +372,49 @@ export default function App() {
         )}
       </div>
 
-      {/* TWO-COLUMN GRID LAYOUT */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start my-4 flex-grow w-full">
-        {/* Left Control Column (col-span-5) */}
-        <div className="lg:col-span-5 space-y-6">
+      {/* THREE-COLUMN GRID LAYOUT */}
+      <div className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch my-2 overflow-y-auto lg:overflow-hidden w-full">
+        {/* Left Column: Stats & Filters (col-span-3) */}
+        <div className="lg:col-span-3 lg:h-full flex flex-col gap-3 shrink-0 justify-start">
           {/* Quick Stats Grid */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="p-3.5 rounded-2xl glass-panel border border-slate-800/80 flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                <Clock className="w-5 h-5" />
+          <div className="grid grid-cols-2 gap-2.5 shrink-0">
+            <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800 flex items-center gap-2.5">
+              <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
+                <Clock className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-xl font-extrabold text-white">{stats.dueToday}</div>
-                <div className="text-[11px] font-medium text-slate-400">Due Today</div>
+                <div className="text-lg font-extrabold text-white leading-tight">{stats.dueToday}</div>
+                <div className="text-[10px] font-bold text-slate-400">Due Today</div>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-2xl glass-panel border border-slate-800/80 flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <CheckCircle className="w-5 h-5" />
+            <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800 flex items-center gap-2.5">
+              <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+                <CheckCircle className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-xl font-extrabold text-white">{stats.mastered}</div>
-                <div className="text-[11px] font-medium text-slate-400">Mastered</div>
+                <div className="text-lg font-extrabold text-white leading-tight">{stats.mastered}</div>
+                <div className="text-[10px] font-bold text-slate-400">Mastered</div>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-2xl glass-panel border border-slate-800/80 flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                <Brain className="w-5 h-5" />
+            <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800 flex items-center gap-2.5">
+              <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
+                <Brain className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-xl font-extrabold text-white">{stats.learning}</div>
-                <div className="text-[11px] font-medium text-slate-400">In Progress</div>
+                <div className="text-lg font-extrabold text-white leading-tight">{stats.learning}</div>
+                <div className="text-[10px] font-bold text-slate-400">In Progress</div>
               </div>
             </div>
 
-            <div className="p-3.5 rounded-2xl glass-panel border border-slate-800/80 flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                <Flame className="w-5 h-5" />
+            <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800 flex items-center gap-2.5">
+              <div className="p-2 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 shrink-0">
+                <Flame className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-xl font-extrabold text-white">{stats.streak} Days</div>
-                <div className="text-[11px] font-medium text-slate-400">Active Streak</div>
+                <div className="text-lg font-extrabold text-white leading-tight">{stats.streak} Days</div>
+                <div className="text-[10px] font-bold text-slate-400">Streak</div>
               </div>
             </div>
           </div>
@@ -429,131 +429,79 @@ export default function App() {
             totalWords={activeUnloadedWords.length}
             currentChunkCount={sessionDeck.length}
           />
-
-          {/* Learning Chunk Manager */}
-          <div className="p-4 rounded-2xl glass-panel border border-slate-800 space-y-3">
-            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-              <span>Learning Chunk Manager</span>
-              <span className="text-[10px] text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md">
-                {unlockedChunks.length} Active
-              </span>
-            </h3>
-            <p className="text-[11px] text-slate-400 leading-relaxed">
-              Check chunks to include their words in your study sessions. Uncheck to temporarily exclude them.
-            </p>
-            
-            <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
-              {availableChunks.map((chunkNum) => {
-                const isUnlocked = unlockedChunks.includes(chunkNum);
-                return (
-                  <label
-                    key={chunkNum}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold cursor-pointer transition-all duration-200 select-none ${
-                      isUnlocked
-                        ? 'bg-indigo-600/15 border-indigo-500/30 text-white'
-                        : 'bg-slate-900/40 border-slate-800/80 text-slate-500 hover:text-slate-300 hover:border-slate-700'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isUnlocked}
-                      onChange={() => toggleChunkManual(chunkNum)}
-                      className="rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 bg-slate-900 w-3.5 h-3.5 cursor-pointer"
-                    />
-                    <span>Chunk {chunkNum}</span>
-                  </label>
-                );
-              })}
-            </div>
-            
-            <div className="flex gap-2 pt-1">
-              <button
-                onClick={() => updateUnlockedChunks(availableChunks)}
-                className="flex-1 py-1.5 text-center bg-slate-900 hover:bg-slate-800 border border-slate-805 hover:border-slate-700 text-[10px] font-bold rounded-lg text-slate-300 transition"
-              >
-                Select All
-              </button>
-              <button
-                onClick={() => updateUnlockedChunks([1])}
-                className="flex-1 py-1.5 text-center bg-slate-900 hover:bg-slate-800 border border-slate-805 hover:border-slate-700 text-[10px] font-bold rounded-lg text-slate-300 transition"
-              >
-                Reset to Chunk 1
-              </button>
-            </div>
-          </div>
         </div>
 
-        {/* Right Study Column (col-span-7) */}
-        <div className="lg:col-span-7 flex flex-col justify-start">
+        {/* Center Column: Card View (col-span-6) */}
+        <div className="lg:col-span-6 lg:h-full flex flex-col justify-center items-center overflow-hidden py-2 shrink-0">
           {currentCard ? (
-            <div>
-              <div className="flex flex-col items-center gap-3 max-w-xl mx-auto px-2 mb-4">
-                <div className="flex items-center justify-between w-full text-xs text-slate-400">
-                  <span className="font-medium">Card {currentIndex + 1} of {sessionDeck.length}</span>
-                  <button
-                    onClick={rebuildSessionDeck}
-                    className="flex items-center gap-1 hover:text-indigo-400 transition text-xs font-medium"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" /> Restart Queue
-                  </button>
-                </div>
-
-                {/* Numbered card navigation buttons */}
-                <div className="flex flex-wrap items-center justify-center gap-1.5 py-1 w-full max-h-24 overflow-y-auto pr-1">
-                  {sessionDeck.map((_, idx) => {
-                    const isCurrent = idx === currentIndex;
-                    const isReviewed = reviewedCardIds.has(sessionDeck[idx].id);
-                    return (
-                      <button
-                        key={idx}
-                        onClick={() => {
-                          setCurrentIndex(idx);
-                          setIsFlipped(false);
-                        }}
-                        className={`relative w-8 h-8 rounded-full text-xs font-bold transition-all duration-200 flex items-center justify-center shrink-0 border ${
-                          isCurrent
-                            ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/30 scale-110 ring-2 ring-indigo-400/50'
-                            : isReviewed
-                            ? 'bg-slate-900/60 hover:bg-slate-800 text-emerald-400 border-emerald-500/40 hover:border-emerald-500/60'
-                            : 'bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-800 hover:border-slate-700'
-                        }`}
-                      >
-                        {idx + 1}
-                        {isReviewed && !isCurrent && (
-                          <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border border-slate-950 transform translate-x-1/4 -translate-y-1/4" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
+            <div className="w-full flex flex-col justify-center items-center gap-2">
+              <div className="flex items-center justify-between w-full max-w-xl text-xs text-slate-400 px-2 shrink-0">
+                <span className="font-semibold">Card {currentIndex + 1} of {sessionDeck.length}</span>
+                <button
+                  onClick={rebuildSessionDeck}
+                  className="flex items-center gap-1 hover:text-indigo-400 transition text-xs font-semibold"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" /> Restart Queue
+                </button>
               </div>
 
-              <Flashcard
-                card={currentCard}
-                progress={currentProgress}
-                onGradeCard={handleGradeCard}
-                isFlipped={isFlipped}
-                setIsFlipped={setIsFlipped}
-              />
+              {/* Numbered card navigation buttons */}
+              <div className="flex flex-wrap items-center justify-center gap-1.5 py-1 w-full max-w-xl max-h-16 overflow-y-auto pr-1 shrink-0">
+                {sessionDeck.map((_, idx) => {
+                  const isCurrent = idx === currentIndex;
+                  const isReviewed = reviewedCardIds.has(sessionDeck[idx].id);
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setCurrentIndex(idx);
+                        setIsFlipped(false);
+                      }}
+                      className={`relative w-7 h-7 rounded-full text-xs font-bold transition-all duration-200 flex items-center justify-center shrink-0 border ${
+                        isCurrent
+                          ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/30 scale-105 ring-1 ring-indigo-450/40'
+                          : isReviewed
+                          ? 'bg-slate-900/60 hover:bg-slate-800 text-emerald-400 border-emerald-500/40 hover:border-emerald-500/60'
+                          : 'bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-800 hover:border-slate-700'
+                      }`}
+                    >
+                      {idx + 1}
+                      {isReviewed && !isCurrent && (
+                        <span className="absolute top-0 right-0 w-2 h-2 bg-emerald-500 rounded-full border border-slate-950 transform translate-x-1/4 -translate-y-1/4" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="w-full shrink-0">
+                <Flashcard
+                  card={currentCard}
+                  progress={currentProgress}
+                  onGradeCard={handleGradeCard}
+                  isFlipped={isFlipped}
+                  setIsFlipped={setIsFlipped}
+                />
+              </div>
             </div>
           ) : (
-            <div className="p-8 rounded-3xl glass-card text-center space-y-4 max-w-md mx-auto my-auto shadow-xl">
-              <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto">
-                <Trophy className="w-8 h-8" />
+            <div className="p-8 rounded-3xl glass-card text-center space-y-4 max-w-md mx-auto my-auto shadow-xl shrink-0">
+              <div className="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto">
+                <Trophy className="w-7 h-7" />
               </div>
-              <h3 className="text-xl font-bold text-white">All Cards Completed!</h3>
+              <h3 className="text-lg font-bold text-white">All Cards Completed!</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
                 You have reviewed all cards in this chunk for today. Great job maintaining your recall!
               </p>
               
               {nextAvailableChunk ? (
-                <div className="pt-4 border-t border-slate-800/80 mt-2 space-y-3">
-                  <p className="text-[11px] text-indigo-300 font-medium leading-relaxed">
+                <div className="pt-3 border-t border-slate-800/80 mt-1 space-y-2.5">
+                  <p className="text-[11px] text-indigo-300 font-semibold leading-relaxed">
                     You have finished studying all active cards. Ready to expand your learning?
                   </p>
                   <button
                     onClick={handleUnlockNextChunk}
-                    className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition"
+                    className="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition"
                   >
                     Unlock & Add Chunk {nextAvailableChunk}
                   </button>
@@ -561,7 +509,7 @@ export default function App() {
               ) : (
                 <button
                   onClick={rebuildSessionDeck}
-                  className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 transition"
+                  className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 transition"
                 >
                   Review Again
                 </button>
@@ -569,10 +517,64 @@ export default function App() {
             </div>
           )}
         </div>
+
+        {/* Right Column: Chunk Manager (col-span-3) */}
+        <div className="lg:col-span-3 lg:h-full flex flex-col bg-slate-900/20 border border-slate-800/80 p-3 rounded-2xl overflow-hidden shrink-0 justify-between gap-3">
+          <div className="flex flex-col overflow-hidden flex-grow">
+            <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between shrink-0 mb-1">
+              <span>Learning Chunk Manager</span>
+              <span className="text-[10px] text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md">
+                {unlockedChunks.length} Active
+              </span>
+            </h3>
+            <p className="text-[10px] text-slate-400 leading-relaxed shrink-0 mb-2">
+              Select chunks to include in your active study sessions.
+            </p>
+            
+            <div className="grid grid-cols-2 lg:grid-cols-1 gap-1.5 overflow-y-auto pr-1 flex-grow scrollbar-thin">
+              {availableChunks.map((chunkNum) => {
+                const isUnlocked = unlockedChunks.includes(chunkNum);
+                return (
+                  <label
+                    key={chunkNum}
+                    className={`flex items-center gap-2 px-2.5 py-1.5 rounded-xl border text-[11px] font-semibold cursor-pointer transition-all duration-200 select-none ${
+                      isUnlocked
+                        ? 'bg-indigo-600/15 border-indigo-500/20 text-white'
+                        : 'bg-slate-900/40 border-slate-800/40 text-slate-500 hover:text-slate-350 hover:border-slate-700'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isUnlocked}
+                      onChange={() => toggleChunkManual(chunkNum)}
+                      className="rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 bg-slate-900 w-3 h-3 cursor-pointer shrink-0"
+                    />
+                    <span>Chunk {chunkNum}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+          
+          <div className="flex gap-2 pt-1 border-t border-slate-800 shrink-0">
+            <button
+              onClick={() => updateUnlockedChunks(availableChunks)}
+              className="flex-1 py-1.5 text-center bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[10px] font-bold rounded-lg text-slate-300 transition"
+            >
+              Select All
+            </button>
+            <button
+              onClick={() => updateUnlockedChunks([1])}
+              className="flex-1 py-1.5 text-center bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[10px] font-bold rounded-lg text-slate-300 transition"
+            >
+              Reset to 1
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* FOOTER */}
-      <footer className="text-center text-xs text-slate-500 py-4 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-2 mt-8">
+      <footer className="text-center text-[11px] text-slate-500 py-2.5 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-2 shrink-0">
         <p>WordSmart Vocabulary Trainer • Powered by SM-2 Algorithm</p>
         <div className="flex items-center gap-4">
           <button onClick={() => setIsGuideModalOpen(true)} className="hover:text-slate-300 transition">
