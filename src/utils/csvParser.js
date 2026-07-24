@@ -56,14 +56,17 @@ function parseCSVText(csvText) {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
-        const parsedWords = results.data.map((row, index) => ({
-          id: `word_${row.Chunk}_${index}`,
-          chunk: parseInt(row.Chunk, 10) || 1,
-          word: (row.Word || '').trim(),
-          pronunciation: (row.Pronunciation || '').trim(),
-          partOfSpeech: (row['Part of Speech'] || '').trim(),
-          definition: (row.Definition || '').trim(),
-        })).filter(w => w.word.length > 0);
+        const parsedWords = results.data.map((row) => {
+          const wordText = (row.Word || '').trim();
+          return {
+            id: `word_${wordText.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+            chunk: parseInt(row.Chunk, 10) || 1,
+            word: wordText,
+            pronunciation: (row.Pronunciation || '').trim(),
+            partOfSpeech: (row['Part of Speech'] || '').trim(),
+            definition: (row.Definition || '').trim(),
+          };
+        }).filter(w => w.word.length > 0);
 
         resolve(parsedWords);
       },

@@ -164,12 +164,9 @@ export default function App() {
       });
     }
 
-    // Advance to next card in deck
+    // Advance or wrap around queue
     setIsFlipped(false);
-    if (currentIndex < activeDeck.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-    } else {
-      // Loop or finished session
+    if (currentIndex >= activeDeck.length - 1) {
       setCurrentIndex(0);
     }
   };
