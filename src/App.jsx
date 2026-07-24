@@ -19,6 +19,17 @@ export default function App() {
   // User Authentication & Cloud Progress
   const [user, setUser] = useState(null);
   const [userProgressMap, setUserProgressMap] = useState({});
+  const [userSentences, setUserSentences] = useState(() => {
+    const saved = localStorage.getItem('wordsmart_user_sentences');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse local user sentences:', e);
+      }
+    }
+    return {};
+  });
 
   // Calculate total mastered count across the entire vocabulary database
   const totalMasteredCount = useMemo(() => {
@@ -123,6 +134,19 @@ export default function App() {
       setUser(session?.user || null);
       if (session?.user) {
         fetchUserProgressFromCloud(session.user.id);
+        fetchUserSentencesFromCloud(session.user.id);
+        // Sync local sentences to cloud if guest had any
+        const savedLocal = localStorage.getItem('wordsmart_user_sentences');
+        if (savedLocal) {
+          try {
+            const parsed = JSON.parse(savedLocal);
+            syncLocalSentencesToCloud(session.user.id, parsed).then(() => {
+              fetchUserSentencesFromCloud(session.user.id);
+            });
+          } catch (e) {
+            console.error('Error syncing local sentences:', e);
+          }
+        }
       }
     });
 
@@ -130,8 +154,22 @@ export default function App() {
       setUser(session?.user || null);
       if (session?.user) {
         fetchUserProgressFromCloud(session.user.id);
+        fetchUserSentencesFromCloud(session.user.id);
+        // Sync local sentences to cloud if guest had any
+        const savedLocal = localStorage.getItem('wordsmart_user_sentences');
+        if (savedLocal) {
+          try {
+            const parsed = JSON.parse(savedLocal);
+            syncLocalSentencesToCloud(session.user.id, parsed).then(() => {
+              fetchUserSentencesFromCloud(session.user.id);
+            });
+          } catch (e) {
+            console.error('Error syncing local sentences:', e);
+          }
+        }
       } else {
         setUserProgressMap({});
+        setUserSentences({});
       }
     });
 
@@ -185,6 +223,98 @@ export default function App() {
       }
     } catch (err) {
       console.error('Cloud sync fetch error:', err);
+    }
+  };
+
+  // Fetch user sentences from Supabase database
+  const fetchUserSentencesFromCloud = async (userId) => {
+    if (!isSupabaseConfigured || !supabase) return;
+    try {
+      const { data, error } = await supabase
+        .from('user_sentences')
+        .select('word_id, sentence')
+        .eq('user_id', userId);
+
+      if (error) {
+        console.error('Error fetching user sentences:', error);
+        return;
+      }
+
+      if (data) {
+        const sentenceMap = {};
+        data.forEach(item => {
+          if (!sentenceMap[item.word_id]) {
+            sentenceMap[item.word_id] = [];
+          }
+          sentenceMap[item.word_id].push(item.sentence);
+        });
+        setUserSentences(sentenceMap);
+      }
+    } catch (err) {
+      console.error('Cloud fetch user sentences error:', err);
+    }
+  };
+
+  // Sync local offline sentences to Supabase
+  const syncLocalSentencesToCloud = async (userId, localSentences) => {
+    if (!isSupabaseConfigured || !supabase || !userId) return;
+    const recordsToInsert = [];
+    Object.entries(localSentences).forEach(([wordId, sentences]) => {
+      sentences.forEach(sentence => {
+        recordsToInsert.push({
+          user_id: userId,
+          word_id: wordId,
+          sentence: sentence
+        });
+      });
+    });
+
+    if (recordsToInsert.length > 0) {
+      try {
+        const { error } = await supabase
+          .from('user_sentences')
+          .insert(recordsToInsert);
+        if (!error) {
+          localStorage.removeItem('wordsmart_user_sentences');
+        } else {
+          console.error('Failed to sync user sentences:', error);
+        }
+      } catch (err) {
+        console.error('Failed to sync local sentences to cloud:', err);
+      }
+    }
+  };
+
+  // Add custom user sentence
+  const handleAddUserSentence = async (wordId, sentenceText) => {
+    const newSentence = sentenceText.trim();
+    if (!newSentence) return;
+
+    setUserSentences(prev => {
+      const updated = {
+        ...prev,
+        [wordId]: [...(prev[wordId] || []), newSentence]
+      };
+
+      if (!user) {
+        localStorage.setItem('wordsmart_user_sentences', JSON.stringify(updated));
+      }
+
+      return updated;
+    });
+
+    if (user && isSupabaseConfigured && supabase) {
+      try {
+        await supabase
+          .from('user_sentences')
+          .insert({
+            user_id: user.id,
+            word_id: wordId,
+            sentence: newSentence
+          });
+      } catch (err) {
+        console.error('Failed to save sentence to Supabase:', err);
+      }
     }
   };
 
@@ -389,6 +519,7 @@ export default function App() {
       await supabase.auth.signOut();
       setUser(null);
       setUserProgressMap({});
+      setUserSentences({});
     }
   };
 
@@ -695,6 +826,8 @@ export default function App() {
                   onGradeCard={handleGradeCard}
                   isFlipped={isFlipped}
                   setIsFlipped={setIsFlipped}
+                  userSentences={userSentences[currentCard.id] || []}
+                  onAddUserSentence={(sentence) => handleAddUserSentence(currentCard.id, sentence)}
                 />
               </div>
             </div>

@@ -1,8 +1,22 @@
-import React, { useState } from 'react';
-import { Volume2, Sparkles, Award, Clock, Eye, RotateCw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Volume2, Sparkles, Award, Clock, Eye, MessageSquare, Plus, X } from 'lucide-react';
 
-export default function Flashcard({ card, progress, onGradeCard, isFlipped, setIsFlipped }) {
+export default function Flashcard({ 
+  card, 
+  progress, 
+  onGradeCard, 
+  isFlipped, 
+  setIsFlipped,
+  userSentences = [],
+  onAddUserSentence
+}) {
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [showSentences, setShowSentences] = useState(false);
+
+  // Always reset to standard answer view when card changes or when flip state changes
+  useEffect(() => {
+    setShowSentences(false);
+  }, [card.id, isFlipped]);
 
   const speakWord = (e) => {
     e.stopPropagation();
@@ -92,40 +106,143 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
                 )}
               </div>
 
-              <button
-                type="button"
-                onClick={speakWord}
-                className="p-2 rounded-full bg-slate-800 hover:bg-indigo-600/30 text-indigo-300 transition border border-slate-700 shrink-0 ml-2"
-              >
-                <Volume2 className="w-3.5 h-3.5" />
-              </button>
+              <div className="flex items-center gap-2">
+                {!showSentences ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowSentences(true);
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-650/20 hover:bg-indigo-600 hover:text-white text-indigo-300 border border-indigo-500/30 transition-all cursor-pointer active:scale-95 text-[11px] font-bold shrink-0"
+                      title="View Sentences"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                      <span>Sentences</span>
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={speakWord}
+                      className="p-2 rounded-full bg-slate-800 hover:bg-indigo-600/30 text-indigo-300 transition border border-slate-700 shrink-0 cursor-pointer"
+                      title="Listen pronunciation"
+                    >
+                      <Volume2 className="w-3.5 h-3.5" />
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowSentences(false);
+                    }}
+                    className="p-2 rounded-full bg-slate-800 hover:bg-rose-600/30 text-rose-350 hover:text-rose-300 hover:border-rose-500/50 transition border border-slate-700 shrink-0 cursor-pointer animate-fade-in"
+                    title="Close Sentences"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
 
-            {/* Details Body — flex-1 + overflow-y-auto so content scrolls, never pushing buttons off */}
-            <div className="flex-1 overflow-y-auto scrollbar-thin min-h-0 space-y-3 py-2">
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-bold uppercase tracking-wider">
-                  {card.partOfSpeech || 'n/a'}
-                </span>
-              </div>
+            {/* Details and Content Block — intercept click to stop flipping card */}
+            <div 
+              onClick={(e) => e.stopPropagation()} 
+              className="flex-1 flex flex-col min-h-0"
+            >
+              {showSentences ? (
+                /* SENTENCES BLOCK — covers/replaces standard details */
+                <div className="flex-1 overflow-y-auto scrollbar-thin min-h-0 py-2.5 flex flex-col justify-between space-y-3">
+                  {/* List of Sentences */}
+                  <div className="flex-grow overflow-y-auto space-y-2.5 pr-1 min-h-[100px]">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Example Sentences</span>
+                    </div>
 
-              <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
-                <p className="text-sm sm:text-base text-slate-100 leading-relaxed font-medium">
-                  {card.definition}
-                </p>
-              </div>
+                    {!card.sentence && userSentences.length === 0 ? (
+                      <div className="p-4 rounded-xl bg-slate-900/30 border border-dashed border-slate-800 text-center my-auto flex flex-col items-center justify-center min-h-[120px]">
+                        <p className="text-[11px] text-slate-500 font-semibold">No sentences saved for this word yet.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {/* App CSV Sentence */}
+                        {card.sentence && (
+                          <div className="p-3 rounded-xl bg-indigo-950/20 border border-indigo-500/10 text-xs text-indigo-200 leading-relaxed font-medium">
+                            <span className="text-[8px] font-bold text-indigo-400 uppercase tracking-widest block mb-1">App Example</span>
+                            {card.sentence}
+                          </div>
+                        )}
 
-              {/* SRS Stats */}
-              <div className="flex items-center justify-between text-[11px] text-slate-400 px-1 pt-0.5">
-                <span className="flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-indigo-400" />
-                  Interval: <strong className="text-white">{progress?.interval || 0}d</strong>
-                </span>
-                <span className="flex items-center gap-1">
-                  <Award className="w-3.5 h-3.5 text-amber-400" />
-                  Ease Factor: <strong className="text-white">{progress?.easeFactor || 2.5}</strong>
-                </span>
-              </div>
+                        {/* Custom User Sentences */}
+                        {userSentences.map((sentence, idx) => (
+                          <div key={idx} className="p-3 rounded-xl bg-emerald-950/20 border border-emerald-500/10 text-xs text-emerald-200 leading-relaxed font-medium">
+                            <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">My Example</span>
+                            {sentence}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Add Sentence Input */}
+                  <form 
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const form = e.target;
+                      const input = form.elements.sentenceInput;
+                      const val = input.value.trim();
+                      if (val) {
+                        onAddUserSentence(val);
+                        input.value = '';
+                      }
+                    }}
+                    className="flex gap-2 pt-2 border-t border-slate-900/60 shrink-0"
+                  >
+                    <input
+                      name="sentenceInput"
+                      type="text"
+                      placeholder="Write a custom sentence..."
+                      className="flex-grow px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 focus:outline-none focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 text-xs text-slate-100 placeholder-slate-500 min-w-0"
+                    />
+                    <button
+                      type="submit"
+                      className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer flex items-center justify-center shrink-0 active:scale-95"
+                      title="Add sentence"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </form>
+                </div>
+              ) : (
+                /* DETAILS BODY (ORIGINAL) */
+                <div className="flex-1 overflow-y-auto scrollbar-thin min-h-0 space-y-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-bold uppercase tracking-wider">
+                      {card.partOfSpeech || 'n/a'}
+                    </span>
+                  </div>
+
+                  <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+                    <p className="text-sm sm:text-base text-slate-100 leading-relaxed font-medium">
+                      {card.definition}
+                    </p>
+                  </div>
+
+                  {/* SRS Stats */}
+                  <div className="flex items-center justify-between text-[11px] text-slate-400 px-1 pt-0.5">
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5 text-indigo-400" />
+                      Interval: <strong className="text-white">{progress?.interval || 0}d</strong>
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Award className="w-3.5 h-3.5 text-amber-400" />
+                      Ease Factor: <strong className="text-white">{progress?.easeFactor || 2.5}</strong>
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* SRS RATING BUTTONS — always pinned at bottom, never clipped */}
