@@ -11,10 +11,10 @@ export default function StatsHeader({ user, onOpenAuth, onOpenHelp, onLogout }) 
             <Brain className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+            <h1 className="text-xl font-bold text-white tracking-tight flex items-baseline gap-1.5 select-none">
               WordSmart
-              <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-normal border border-indigo-500/30">
-                SM-2 Active Recall
+              <span className="text-xs font-medium text-slate-500 font-mono">
+                v{__APP_VERSION__}
               </span>
             </h1>
             <p className="text-xs text-slate-400">Spaced Repetition & Vocabulary Mastery</p>
