@@ -22,7 +22,7 @@ export default function StatsHeader({ user, onOpenAuth, onOpenHelp, onLogout }) 
         </div>
 
         {/* User Account State */}
-        <div className="flex items-center gap-2">
+        <div id="tour-sync" className="flex items-center gap-2">
           {user ? (
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-3 bg-slate-900/80 px-3.5 py-1.5 rounded-xl border border-slate-800">

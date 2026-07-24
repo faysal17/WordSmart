@@ -29,6 +29,9 @@ export default function App() {
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [showTourBanner, setShowTourBanner] = useState(() => {
+    return !localStorage.getItem('wordsmart_tour_completed');
+  });
 
   // Card Status Filter & Session states
   const [studyModeFilter, setStudyModeFilter] = useState('ALL');
@@ -441,9 +444,46 @@ export default function App() {
         <StatsHeader
           user={user}
           onOpenAuth={() => setIsAuthModalOpen(true)}
-          onOpenHelp={() => setIsHelpModalOpen(true)}
+          onOpenHelp={() => {
+            setIsHelpModalOpen(true);
+            setShowTourBanner(false);
+            localStorage.setItem('wordsmart_tour_completed', 'true');
+          }}
           onLogout={handleLogout}
         />
+
+        {showTourBanner && (
+          <div className="mb-2.5 p-3.5 rounded-2xl bg-indigo-950/30 border border-indigo-500/20 text-indigo-200 text-xs flex flex-col sm:flex-row items-center justify-between gap-3 animate-fade-in shrink-0 shadow-lg shadow-indigo-950/20">
+            <div className="flex items-center gap-2.5">
+              <Sparkles className="w-5 h-5 text-indigo-400 shrink-0" />
+              <div>
+                <p className="font-bold text-white">Welcome to WordSmart!</p>
+                <p className="text-[11px] text-indigo-300/90 mt-0.5">Let's take a quick 1-minute interactive walkthrough to master spaced-repetition cards and unlock chunks.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => {
+                  setIsHelpModalOpen(true);
+                  setShowTourBanner(false);
+                  localStorage.setItem('wordsmart_tour_completed', 'true');
+                }}
+                className="px-3.5 py-1.5 rounded-xl bg-indigo-650 hover:bg-indigo-650 text-white font-bold text-[11px] shadow-md shadow-indigo-600/20 transition hover:scale-[1.02] active:scale-95 cursor-pointer"
+              >
+                Start Tour
+              </button>
+              <button
+                onClick={() => {
+                  setShowTourBanner(false);
+                  localStorage.setItem('wordsmart_tour_completed', 'true');
+                }}
+                className="px-2.5 py-1.5 rounded-xl hover:bg-slate-900 text-slate-400 hover:text-slate-300 font-semibold text-[11px] transition cursor-pointer"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
 
         {!user && !isSupabaseConfigured && (
           <div className="mb-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] flex items-center gap-2 animate-fade-in shrink-0">
@@ -456,7 +496,7 @@ export default function App() {
       {/* THREE-COLUMN GRID LAYOUT */}
       <div className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch my-2 overflow-y-auto lg:overflow-hidden w-full">
         {/* Left Column: Stats & Filters (col-span-3) */}
-        <div className="lg:col-span-3 lg:h-full flex flex-col justify-between rounded-2xl glass-panel column-panel overflow-y-auto scrollbar-thin shrink-0">
+        <div id="tour-metrics" className="lg:col-span-3 lg:h-full flex flex-col justify-between rounded-2xl glass-panel column-panel overflow-y-auto scrollbar-thin shrink-0">
           <div className="space-y-4 flex flex-col overflow-hidden">
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-2 gap-2 shrink-0">
@@ -606,7 +646,7 @@ export default function App() {
         </div>
 
         {/* Center Column: Card View (col-span-6) */}
-        <div className="lg:col-span-6 lg:h-full flex flex-col justify-start items-center rounded-2xl glass-panel column-panel overflow-hidden shrink-0 lg:pt-2">
+        <div id="tour-flashcard" className="lg:col-span-6 lg:h-full flex flex-col justify-start items-center rounded-2xl glass-panel column-panel overflow-hidden shrink-0 lg:pt-2">
           {currentCard ? (
             <div className="w-full flex flex-col justify-start items-center gap-3 animate-fade-in h-full">
               <div className="flex items-center justify-between w-full max-w-xl text-xs text-slate-400 px-2 shrink-0">
@@ -808,7 +848,7 @@ export default function App() {
         </div>
 
         {/* Right Column: Chunk Manager (col-span-3) */}
-        <div className="lg:col-span-3 lg:h-full flex flex-col justify-between rounded-2xl glass-panel column-panel overflow-y-auto scrollbar-thin shrink-0">
+        <div id="tour-chunks" className="lg:col-span-3 lg:h-full flex flex-col justify-between rounded-2xl glass-panel column-panel overflow-y-auto scrollbar-thin shrink-0">
           <div className="flex flex-col overflow-hidden flex-grow">
             <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between shrink-0 mb-1">
               <span>Learning Chunk Manager</span>
