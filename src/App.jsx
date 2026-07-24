@@ -7,7 +7,7 @@ import Flashcard from './components/Flashcard';
 import ChunkSelector from './components/ChunkSelector';
 import StatsHeader from './components/StatsHeader';
 import AuthModal from './components/AuthModal';
-import SupabaseGuideModal from './components/SupabaseGuideModal';
+import HelpGuideModal from './components/HelpGuideModal';
 
 export default function App() {
   const [words, setWords] = useState([]);
@@ -28,7 +28,7 @@ export default function App() {
   }, [userProgressMap]);
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
 
   // Card Status Filter & Session states
   const [studyModeFilter, setStudyModeFilter] = useState('ALL');
@@ -441,22 +441,14 @@ export default function App() {
         <StatsHeader
           user={user}
           onOpenAuth={() => setIsAuthModalOpen(true)}
-          onOpenGuide={() => setIsGuideModalOpen(true)}
+          onOpenHelp={() => setIsHelpModalOpen(true)}
           onLogout={handleLogout}
         />
 
         {!user && !isSupabaseConfigured && (
-          <div className="mb-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] flex items-center justify-between animate-fade-in shrink-0">
-            <div className="flex items-center gap-2">
-              <CloudOff className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span>Demo Mode: Cloud sync is inactive. Configure Supabase environment variables to persist across devices.</span>
-            </div>
-            <button
-              onClick={() => setIsGuideModalOpen(true)}
-              className="px-2 py-0.5 rounded-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 font-semibold transition text-[10px]"
-            >
-              Guide
-            </button>
+          <div className="mb-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] flex items-center gap-2 animate-fade-in shrink-0">
+            <CloudOff className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span>Demo Mode: Cloud sync is inactive. Sign In to persist your streaks and cards vocabulary progress across devices.</span>
           </div>
         )}
       </div>
@@ -898,11 +890,11 @@ export default function App() {
       <footer className="text-center text-[11px] text-slate-500 py-2.5 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-2 shrink-0">
         <p>WordSmart Vocabulary Trainer • Powered by SM-2 Algorithm</p>
         <div className="flex items-center gap-4">
-          <button onClick={() => setIsGuideModalOpen(true)} className="hover:text-slate-300 transition">
-            Supabase Setup Guide
+          <button onClick={() => setIsHelpModalOpen(true)} className="hover:text-slate-300 transition cursor-pointer">
+            Interactive Help Guide
           </button>
           <span>•</span>
-          <button onClick={() => setIsAuthModalOpen(true)} className="hover:text-slate-300 transition">
+          <button onClick={() => setIsAuthModalOpen(true)} className="hover:text-slate-300 transition cursor-pointer">
             Account Sync
           </button>
         </div>
@@ -918,9 +910,9 @@ export default function App() {
         }}
       />
 
-      <SupabaseGuideModal
-        isOpen={isGuideModalOpen}
-        onClose={() => setIsGuideModalOpen(false)}
+      <HelpGuideModal
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
       />
     </div>
   );
