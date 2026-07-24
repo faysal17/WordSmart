@@ -452,7 +452,7 @@ export default function App() {
       {/* THREE-COLUMN GRID LAYOUT */}
       <div className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch my-2 overflow-y-auto lg:overflow-hidden w-full">
         {/* Left Column: Stats & Filters (col-span-3) */}
-        <div className="lg:col-span-3 lg:h-full flex flex-col justify-between p-4 rounded-2xl glass-panel overflow-hidden shrink-0 gap-4">
+        <div className="lg:col-span-3 lg:h-full flex flex-col justify-between p-3.5 rounded-2xl glass-panel overflow-y-auto scrollbar-thin shrink-0 gap-3.5">
           <div className="space-y-4 flex flex-col overflow-hidden">
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-2 gap-2 shrink-0">
@@ -602,7 +602,7 @@ export default function App() {
         </div>
 
         {/* Center Column: Card View (col-span-6) */}
-        <div className="lg:col-span-6 lg:h-full flex flex-col justify-start items-center p-4 rounded-2xl glass-panel overflow-hidden shrink-0 gap-3 lg:pt-3">
+        <div className="lg:col-span-6 lg:h-full flex flex-col justify-start items-center p-3.5 rounded-2xl glass-panel overflow-y-auto scrollbar-thin shrink-0 gap-3 lg:pt-3">
           {currentCard ? (
             <div className="w-full flex flex-col justify-start items-center gap-3 animate-fade-in flex-grow">
               <div className="flex items-center justify-between w-full max-w-xl text-xs text-slate-400 px-2 shrink-0">
@@ -689,7 +689,7 @@ export default function App() {
         </div>
 
         {/* Right Column: Chunk Manager (col-span-3) */}
-        <div className="lg:col-span-3 lg:h-full flex flex-col justify-between p-4 rounded-2xl glass-panel overflow-hidden shrink-0 gap-3">
+        <div className="lg:col-span-3 lg:h-full flex flex-col justify-between p-3.5 rounded-2xl glass-panel overflow-y-auto scrollbar-thin shrink-0 gap-3">
           <div className="flex flex-col overflow-hidden flex-grow">
             <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between shrink-0 mb-1">
               <span>Learning Chunk Manager</span>
