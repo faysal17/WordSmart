@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import confetti from 'canvas-confetti';
 import { Sparkles, Trophy, RotateCcw, AlertTriangle, CloudOff } from 'lucide-react';
 import { loadVocabularyCSV } from './utils/csvParser';
 import { calculateSM2, sortCardsForStudySession, DEFAULT_SM2_CARD } from './utils/sm2';
@@ -22,6 +21,12 @@ export default function App() {
   const [userProgressMap, setUserProgressMap] = useState({});
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
+
+  // Card Status Filter & Session states
+  const [studyModeFilter, setStudyModeFilter] = useState('ALL');
+  const [sessionDeck, setSessionDeck] = useState([]);
+  const [syncVersion, setSyncVersion] = useState(0);
+  const [reviewedCardIds, setReviewedCardIds] = useState(new Set());
 
   // Load CSV vocabulary on mount
   useEffect(() => {
@@ -88,28 +93,12 @@ export default function App() {
           };
         });
         setUserProgressMap(progressMap);
+        setSyncVersion(v => v + 1);
       }
     } catch (err) {
       console.error('Cloud sync fetch error:', err);
     }
   };
-
-  // Filter words by selected chunk
-  const filteredWords = useMemo(() => {
-    if (selectedChunk === 'ALL') return words;
-    return words.filter(w => w.chunk === parseInt(selectedChunk, 10));
-  }, [words, selectedChunk]);
-
-  // Sort queue by SM-2 priority (Due > Unseen > Learning/Review)
-  const activeDeck = useMemo(() => {
-    return sortCardsForStudySession(filteredWords, userProgressMap);
-  }, [filteredWords, userProgressMap]);
-
-  // Reset index on deck / chunk change
-  useEffect(() => {
-    setCurrentIndex(0);
-    setIsFlipped(false);
-  }, [selectedChunk]);
 
   // Available unique chunks
   const availableChunks = useMemo(() => {
@@ -117,8 +106,36 @@ export default function App() {
     return Array.from(chunkSet).sort((a, b) => a - b);
   }, [words]);
 
+  // Rebuild the session deck based on chosen chunk and status filter
+  const rebuildSessionDeck = () => {
+    const chunkFiltered = selectedChunk === 'ALL'
+      ? words
+      : words.filter(w => w.chunk === parseInt(selectedChunk, 10));
+
+    const statusFiltered = chunkFiltered.filter(w => {
+      const prog = userProgressMap[w.id];
+      const isNew = !prog || prog.repetitions === 0;
+      if (studyModeFilter === 'NEW') return isNew;
+      if (studyModeFilter === 'STUDIED') return !isNew;
+      return true;
+    });
+
+    const sorted = sortCardsForStudySession(statusFiltered, userProgressMap);
+    setSessionDeck(sorted);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+    setReviewedCardIds(new Set());
+  };
+
+  // Rebuild session deck on filter, chunk, loading, or identity changes
+  useEffect(() => {
+    if (words.length > 0) {
+      rebuildSessionDeck();
+    }
+  }, [words, selectedChunk, studyModeFilter, user, syncVersion]);
+
   // Current Card
-  const currentCard = activeDeck[currentIndex] || null;
+  const currentCard = sessionDeck[currentIndex] || null;
   const currentProgress = currentCard ? (userProgressMap[currentCard.id] || DEFAULT_SM2_CARD) : DEFAULT_SM2_CARD;
 
   // Grade card with SM-2 algorithm
@@ -155,19 +172,17 @@ export default function App() {
       }
     }
 
-    // Trigger celebration on Easy or Mastered status
-    if (grade === 5 || updatedProg.status === 'mastered') {
-      confetti({
-        particleCount: 30,
-        spread: 60,
-        origin: { y: 0.7 }
-      });
-    }
+    // Mark card as reviewed in this session
+    setReviewedCardIds((prev) => {
+      const next = new Set(prev);
+      next.add(currentCard.id);
+      return next;
+    });
 
     // Advance or wrap around queue
     setIsFlipped(false);
-    if (currentIndex >= activeDeck.length - 1) {
-      setCurrentIndex(0);
+    if (sessionDeck.length > 0) {
+      setCurrentIndex((prev) => (prev + 1) % sessionDeck.length);
     }
   };
 
@@ -252,8 +267,10 @@ export default function App() {
           chunks={availableChunks}
           selectedChunk={selectedChunk}
           setSelectedChunk={setSelectedChunk}
+          studyModeFilter={studyModeFilter}
+          setStudyModeFilter={setStudyModeFilter}
           totalWords={words.length}
-          currentChunkCount={filteredWords.length}
+          currentChunkCount={sessionDeck.length}
         />
       </div>
 
@@ -261,14 +278,45 @@ export default function App() {
       <main className="my-8">
         {currentCard ? (
           <div>
-            <div className="flex items-center justify-between text-xs text-slate-400 max-w-xl mx-auto px-2 mb-2">
-              <span>Card {currentIndex + 1} of {activeDeck.length}</span>
-              <button
-                onClick={() => { setCurrentIndex(0); setIsFlipped(false); }}
-                className="flex items-center gap-1 hover:text-indigo-400 transition"
-              >
-                <RotateCcw className="w-3.5 h-3.5" /> Restart Queue
-              </button>
+            <div className="flex flex-col items-center gap-3 max-w-xl mx-auto px-2 mb-4">
+              <div className="flex items-center justify-between w-full text-xs text-slate-400">
+                <span className="font-medium">Card {currentIndex + 1} of {sessionDeck.length}</span>
+                <button
+                  onClick={rebuildSessionDeck}
+                  className="flex items-center gap-1 hover:text-indigo-400 transition text-xs font-medium"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" /> Restart Queue
+                </button>
+              </div>
+
+              {/* Numbered card navigation buttons */}
+              <div className="flex flex-wrap items-center justify-center gap-1.5 py-1 w-full max-h-24 overflow-y-auto pr-1">
+                {sessionDeck.map((_, idx) => {
+                  const isCurrent = idx === currentIndex;
+                  const isReviewed = reviewedCardIds.has(sessionDeck[idx].id);
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        setCurrentIndex(idx);
+                        setIsFlipped(false);
+                      }}
+                      className={`relative w-8 h-8 rounded-full text-xs font-bold transition-all duration-200 flex items-center justify-center shrink-0 border ${
+                        isCurrent
+                          ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/30 scale-110 ring-2 ring-indigo-400/50'
+                          : isReviewed
+                          ? 'bg-slate-900/60 hover:bg-slate-800 text-emerald-400 border-emerald-500/40 hover:border-emerald-500/60'
+                          : 'bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border-slate-800 hover:border-slate-700'
+                      }`}
+                    >
+                      {idx + 1}
+                      {isReviewed && !isCurrent && (
+                        <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border border-slate-950 transform translate-x-1/4 -translate-y-1/4" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <Flashcard
@@ -289,7 +337,7 @@ export default function App() {
               You have reviewed all cards in this chunk for today. Great job maintaining your recall!
             </p>
             <button
-              onClick={() => { setCurrentIndex(0); setIsFlipped(false); }}
+              onClick={rebuildSessionDeck}
               className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 transition"
             >
               Review Again
