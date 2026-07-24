@@ -217,29 +217,31 @@ export default function Flashcard({
                 </div>
               ) : (
                 /* DETAILS BODY (ORIGINAL) */
-                <div className="flex-1 overflow-y-auto scrollbar-thin min-h-0 space-y-3 py-2">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-bold uppercase tracking-wider">
-                      {card.partOfSpeech || 'n/a'}
-                    </span>
-                  </div>
+                <div className="flex-1 overflow-y-auto scrollbar-thin min-h-0 py-2 flex flex-col">
+                  <div className="my-auto space-y-3.5 w-full animate-fade-in">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-bold uppercase tracking-wider">
+                        {card.partOfSpeech || 'n/a'}
+                      </span>
+                    </div>
 
-                  <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
-                    <p className="text-sm sm:text-base text-slate-100 leading-relaxed font-medium">
-                      {card.definition}
-                    </p>
-                  </div>
+                    <div className="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800">
+                      <p className="text-sm sm:text-base text-slate-100 leading-relaxed font-medium">
+                        {card.definition}
+                      </p>
+                    </div>
 
-                  {/* SRS Stats */}
-                  <div className="flex items-center justify-between text-[11px] text-slate-400 px-1 pt-0.5">
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 text-indigo-400" />
-                      Interval: <strong className="text-white">{progress?.interval || 0}d</strong>
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Award className="w-3.5 h-3.5 text-amber-400" />
-                      Ease Factor: <strong className="text-white">{progress?.easeFactor || 2.5}</strong>
-                    </span>
+                    {/* SRS Stats */}
+                    <div className="flex items-center justify-between text-[11px] text-slate-400 px-1 pt-0.5">
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5 text-indigo-400" />
+                        Interval: <strong className="text-white">{progress?.interval || 0}d</strong>
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Award className="w-3.5 h-3.5 text-amber-400" />
+                        Ease Factor: <strong className="text-white">{progress?.easeFactor || 2.5}</strong>
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}
