@@ -118,3 +118,17 @@ export function sortCardsForStudySession(cards, userProgressMap = {}) {
     return new Date(progA.nextReviewDate).getTime() - new Date(progB.nextReviewDate).getTime();
   });
 }
+
+/**
+ * Calculates the required mastered words count to unlock a chunk.
+ * - Chunks 1-10: 0 mastered words (unlocked by default).
+ * - Chunk 11: 70 mastered words.
+ * - Chunk 12: 80 mastered words.
+ * - Subsequent chunks (C >= 11): 70 + (C - 11) * 10 mastered words.
+ * @param {number} chunkNum - The chunk index number
+ * @returns {number} Required mastered cards count
+ */
+export function getRequiredMasteryCountForChunk(chunkNum) {
+  if (chunkNum <= 10) return 0;
+  return 70 + (chunkNum - 11) * 10;
+}

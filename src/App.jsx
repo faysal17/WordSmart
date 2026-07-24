@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Sparkles, Trophy, RotateCcw, AlertTriangle, CloudOff, Clock, CheckCircle, Flame, Brain } from 'lucide-react';
+import { Sparkles, Trophy, RotateCcw, AlertTriangle, CloudOff, Clock, CheckCircle, Flame, Brain, Lock } from 'lucide-react';
 import { loadVocabularyCSV } from './utils/csvParser';
-import { calculateSM2, sortCardsForStudySession, DEFAULT_SM2_CARD } from './utils/sm2';
+import { calculateSM2, sortCardsForStudySession, DEFAULT_SM2_CARD, getRequiredMasteryCountForChunk } from './utils/sm2';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
 import Flashcard from './components/Flashcard';
 import ChunkSelector from './components/ChunkSelector';
@@ -19,6 +19,14 @@ export default function App() {
   // User Authentication & Cloud Progress
   const [user, setUser] = useState(null);
   const [userProgressMap, setUserProgressMap] = useState({});
+
+  // Calculate total mastered count across the entire vocabulary database
+  const totalMasteredCount = useMemo(() => {
+    return Object.entries(userProgressMap).filter(
+      ([wordId, p]) => wordId !== '__unlocked_chunks__' && p && p.status === 'mastered'
+    ).length;
+  }, [userProgressMap]);
+
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isGuideModalOpen, setIsGuideModalOpen] = useState(false);
 
@@ -67,13 +75,17 @@ export default function App() {
   };
 
   const updateUnlockedChunks = (newChunks) => {
-    const sorted = Array.from(new Set(newChunks)).sort((a, b) => a - b);
+    const allowed = newChunks.filter(c => c <= 10 || totalMasteredCount >= getRequiredMasteryCountForChunk(c));
+    const sorted = Array.from(new Set(allowed)).sort((a, b) => a - b);
     setUnlockedChunks(sorted);
     localStorage.setItem('wordsmart_unlocked_chunks', JSON.stringify(sorted));
     syncUnlockedChunksToCloud(sorted);
   };
 
   const toggleChunkManual = (chunkNum) => {
+    if (chunkNum > 10 && totalMasteredCount < getRequiredMasteryCountForChunk(chunkNum)) {
+      return; // Prevent toggling locked chunks
+    }
     let next;
     if (unlockedChunks.includes(chunkNum)) {
       if (unlockedChunks.length === 1) return; // Prevent removing the last active chunk
@@ -691,17 +703,41 @@ export default function App() {
                   </p>
                   
                   {hasLearnedActiveWords && nextAvailableChunk ? (
-                    <div className="pt-3 border-t border-slate-800/80 mt-1 space-y-2">
-                      <p className="text-[11px] text-indigo-300 font-semibold leading-relaxed">
-                        Ready to expand your learning set?
-                      </p>
-                      <button
-                        onClick={handleUnlockNextChunk}
-                        className="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer"
-                      >
-                        Unlock Chunk {nextAvailableChunk}
-                      </button>
-                    </div>
+                    (() => {
+                      const reqMastery = getRequiredMasteryCountForChunk(nextAvailableChunk);
+                      const isNextLocked = nextAvailableChunk > 10 && totalMasteredCount < reqMastery;
+
+                      if (isNextLocked) {
+                        return (
+                          <div className="pt-3 border-t border-slate-800/80 mt-1 space-y-2 text-left">
+                            <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 flex items-start gap-2">
+                              <Lock className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
+                              <div>
+                                <h4 className="text-[10px] font-bold text-slate-300">Chunk {nextAvailableChunk} is Locked</h4>
+                                <p className="text-[9px] text-slate-400 mt-0.5 leading-relaxed">
+                                  Master <strong className="text-white">{reqMastery}</strong> cards to unlock.
+                                  (Progress: <strong className="text-indigo-400">{totalMasteredCount}/{reqMastery}</strong> mastered)
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div className="pt-3 border-t border-slate-800/80 mt-1 space-y-2">
+                          <p className="text-[11px] text-indigo-300 font-semibold leading-relaxed">
+                            Ready to expand your learning set?
+                          </p>
+                          <button
+                            onClick={handleUnlockNextChunk}
+                            className="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer"
+                          >
+                            Unlock Chunk {nextAvailableChunk}
+                          </button>
+                        </div>
+                      );
+                    })()
                   ) : (
                     <div className="pt-3 border-t border-slate-800/80 mt-1">
                       <button
@@ -724,17 +760,47 @@ export default function App() {
                   </p>
                   
                   {hasLearnedActiveWords && nextAvailableChunk ? (
-                    <div className="pt-3 border-t border-slate-800/80 mt-1 space-y-2.5">
-                      <p className="text-[11px] text-indigo-300 font-semibold leading-relaxed">
-                        You have finished studying all active cards. Ready to expand your learning?
-                      </p>
-                      <button
-                        onClick={handleUnlockNextChunk}
-                        className="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition cursor-pointer"
-                      >
-                        Unlock & Add Chunk {nextAvailableChunk}
-                      </button>
-                    </div>
+                    (() => {
+                      const reqMastery = getRequiredMasteryCountForChunk(nextAvailableChunk);
+                      const isNextLocked = nextAvailableChunk > 10 && totalMasteredCount < reqMastery;
+
+                      if (isNextLocked) {
+                        return (
+                          <div className="pt-3 border-t border-slate-800/80 mt-1 space-y-2.5 text-left">
+                            <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 flex items-start gap-2.5">
+                              <Lock className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
+                              <div>
+                                <h4 className="text-[11px] font-bold text-slate-300">Chunk {nextAvailableChunk} is Locked</h4>
+                                <p className="text-[10px] text-slate-400 mt-0.5 leading-relaxed">
+                                  Master <strong className="text-white">{reqMastery}</strong> cards to unlock this chunk.
+                                  (Progress: <strong className="text-indigo-400">{totalMasteredCount}/{reqMastery}</strong> mastered)
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={rebuildSessionDeck}
+                              className="w-full py-2 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/20 font-semibold text-xs transition cursor-pointer"
+                            >
+                              Review Active Cards Again
+                            </button>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div className="pt-3 border-t border-slate-800/80 mt-1 space-y-2.5">
+                          <p className="text-[11px] text-indigo-300 font-semibold leading-relaxed">
+                            You have finished studying all active cards. Ready to expand your learning?
+                          </p>
+                          <button
+                            onClick={handleUnlockNextChunk}
+                            className="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition cursor-pointer"
+                          >
+                            Unlock & Add Chunk {nextAvailableChunk}
+                          </button>
+                        </div>
+                      );
+                    })()
                   ) : (
                     <button
                       onClick={rebuildSessionDeck}
@@ -765,6 +831,30 @@ export default function App() {
             <div className="grid grid-cols-2 lg:grid-cols-1 gap-1.5 overflow-y-auto pr-1 flex-grow scrollbar-thin">
               {availableChunks.map((chunkNum) => {
                 const isUnlocked = unlockedChunks.includes(chunkNum);
+                const isLocked = chunkNum > 10 && totalMasteredCount < getRequiredMasteryCountForChunk(chunkNum);
+                const requiredMastery = getRequiredMasteryCountForChunk(chunkNum);
+
+                if (isLocked) {
+                  return (
+                    <div
+                      key={chunkNum}
+                      className="relative group flex items-center justify-between px-2.5 py-1.5 rounded-xl border border-slate-900/60 bg-slate-950/20 text-slate-600 text-[11px] font-semibold select-none cursor-not-allowed"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Lock className="w-3.5 h-3.5 text-slate-700 shrink-0" />
+                        <span>Chunk {chunkNum}</span>
+                      </div>
+                      <span className="text-[9px] text-slate-700 bg-slate-900/40 px-1.5 py-0.5 rounded-md">Locked</span>
+
+                      {/* Tooltip on Hover */}
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1.5 hidden group-hover:block bg-slate-900 border border-slate-800 text-slate-200 text-[10px] p-2 rounded-lg shadow-xl z-50 whitespace-nowrap">
+                        Master <strong className="text-indigo-400">{requiredMastery}</strong> cards to unlock.
+                        <div className="text-[9px] text-slate-400 mt-0.5">Progress: {totalMasteredCount} / {requiredMastery} mastered</div>
+                      </div>
+                    </div>
+                  );
+                }
+
                 return (
                   <label
                     key={chunkNum}
