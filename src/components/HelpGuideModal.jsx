@@ -244,7 +244,7 @@ export default function HelpGuideModal({ isOpen, onClose }) {
         </button>
 
         {/* Top slide progress indicator dots */}
-        <div className="flex items-center gap-1.5 mb-5 shrink-0">
+        <div className="flex items-center gap-1.5 mb-5 pr-8 shrink-0">
           {slides.map((_, idx) => (
             <div
               key={idx}
