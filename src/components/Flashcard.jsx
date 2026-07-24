@@ -7,16 +7,16 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
   const speakWord = (e) => {
     e.stopPropagation();
     if (!('speechSynthesis' in window)) return;
-    
+
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(card.word);
     utterance.rate = 0.9;
     utterance.lang = 'en-US';
-    
+
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
-    
+
     window.speechSynthesis.speak(utterance);
   };
 
@@ -30,13 +30,13 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
   return (
     <div className="w-full max-w-xl mx-auto my-1.5 space-y-3">
       {/* CARD MAIN CONTAINER */}
-      <div 
+      <div
         onClick={() => setIsFlipped(!isFlipped)}
-        className="relative min-h-[300px] sm:min-h-[340px] lg:min-h-[320px] xl:min-h-[400px] w-full rounded-3xl cursor-pointer transition-all duration-300 glass-card hover:border-indigo-500/50 hover:shadow-[0_0_40px_rgba(99,102,241,0.15)] flex flex-col justify-between overflow-hidden p-6 sm:p-7"
+        className="relative h-[34vh] min-h-[220px] lg:h-[38vh] lg:min-h-[250px] xl:h-[45vh] xl:min-h-[360px] xl:max-h-[420px] w-full rounded-3xl cursor-pointer transition-all duration-300 glass-card hover:border-indigo-500/50 hover:shadow-[0_0_40px_rgba(99,102,241,0.15)] flex flex-col justify-between overflow-hidden p-5 sm:p-6"
       >
         {!isFlipped ? (
           /* FRONT OF CARD */
-          <div className="flex flex-col justify-between h-full min-h-[240px] sm:min-h-[280px] lg:min-h-[260px] xl:min-h-[330px]">
+          <div className="flex flex-col justify-between h-full min-h-[180px]">
             {/* Top Bar */}
             <div className="flex items-center justify-between">
               <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5">
@@ -54,13 +54,12 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white font-['Plus_Jakarta_Sans'] drop-shadow-md">
                 {card.word}
               </h2>
-              
+
               <button
                 type="button"
                 onClick={speakWord}
-                className={`p-2.5 rounded-full bg-slate-800/80 hover:bg-indigo-600/30 text-indigo-300 transition-all duration-200 border border-slate-700 hover:border-indigo-500/50 ${
-                  isSpeaking ? 'scale-110 ring-2 ring-indigo-400' : ''
-                }`}
+                className={`p-2.5 rounded-full bg-slate-800/80 hover:bg-indigo-600/30 text-indigo-300 transition-all duration-200 border border-slate-700 hover:border-indigo-500/50 ${isSpeaking ? 'scale-110 ring-2 ring-indigo-400' : ''
+                  }`}
                 title="Listen pronunciation"
               >
                 <Volume2 className={`w-4.5 h-4.5 ${isSpeaking ? 'animate-pulse text-indigo-400' : ''}`} />
@@ -81,7 +80,7 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
           </div>
         ) : (
           /* BACK OF CARD (ANSWER REVEALED) */
-          <div className="flex flex-col justify-between h-full min-h-[240px] sm:min-h-[280px] lg:min-h-[260px] xl:min-h-[330px]">
+          <div className="flex flex-col justify-between h-full min-h-[180px]">
             {/* Top Bar */}
             <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
               <div className="flex items-center gap-2.5">
@@ -92,7 +91,7 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
                   </span>
                 )}
               </div>
-              
+
               <button
                 type="button"
                 onClick={speakWord}
@@ -110,7 +109,7 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
                 </span>
               </div>
 
-              <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800">
+              <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-800 overflow-y-auto max-h-[85px] lg:max-h-[105px] xl:max-h-[160px] scrollbar-thin">
                 <p className="text-sm sm:text-base text-slate-100 leading-relaxed font-medium">
                   {card.definition}
                 </p>
