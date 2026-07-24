@@ -616,7 +616,7 @@ export default function App() {
         {/* Center Column: Card View (col-span-6) */}
         <div className="lg:col-span-6 lg:h-full flex flex-col justify-start items-center rounded-2xl glass-panel column-panel overflow-hidden shrink-0 lg:pt-2">
           {currentCard ? (
-            <div className="w-full flex flex-col justify-start items-center gap-3 animate-fade-in flex-grow">
+            <div className="w-full flex flex-col justify-start items-center gap-3 animate-fade-in h-full">
               <div className="flex items-center justify-between w-full max-w-xl text-xs text-slate-400 px-2 shrink-0">
                 <span className="font-semibold">Card {currentIndex + 1} of {sessionDeck.length}</span>
                 <button
@@ -656,7 +656,7 @@ export default function App() {
                 })}
               </div>
 
-              <div className="w-full shrink-0 flex-grow flex items-center justify-center">
+              <div className="w-full flex-1 flex items-center justify-center min-h-0">
                 <Flashcard
                   card={currentCard}
                   progress={currentProgress}

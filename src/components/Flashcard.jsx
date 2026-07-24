@@ -28,7 +28,7 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto my-1">
+    <div className="w-full max-w-xl mx-auto h-full flex flex-col">
       {/* CARD MAIN CONTAINER */}
       <div 
         onClick={() => setIsFlipped(!isFlipped)}

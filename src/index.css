@@ -79,9 +79,10 @@
 
 /* Custom responsive card & panel layout rules for different height monitors */
 .responsive-card {
-  height: 44vh;
-  min-height: 380px;
-  max-height: 460px;
+  flex: 1 1 0;
+  min-height: 320px;
+  max-height: 62vh;
+  width: 100%;
 }
 
 .column-panel {
@@ -91,9 +92,7 @@
 
 @media (max-height: 850px) {
   .responsive-card {
-    height: auto;
-    min-height: 275px;
-    max-height: none;
+    min-height: 260px;
   }
   
   .column-panel {
@@ -110,8 +109,7 @@
 
 @media (max-height: 720px) {
   .responsive-card {
-    height: auto;
-    min-height: 235px;
+    min-height: 220px;
     padding: 1rem !important;
   }
   .responsive-card h2 {
