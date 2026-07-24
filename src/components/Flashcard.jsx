@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Volume2, Sparkles, RotateCw, CheckCircle2, Award, Clock } from 'lucide-react';
+import { Volume2, Sparkles, RotateCw, Award, Clock, Eye } from 'lucide-react';
 
 export default function Flashcard({ card, progress, onGradeCard, isFlipped, setIsFlipped }) {
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -40,7 +40,9 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
         }`}
       >
         {/* FRONT OF CARD */}
-        <div className="absolute inset-0 w-full h-full p-8 flex flex-col justify-between backface-hidden rounded-3xl bg-gradient-to-br from-slate-900/90 via-slate-900/80 to-slate-950/90">
+        <div className={`absolute inset-0 w-full h-full p-8 flex flex-col justify-between backface-hidden rounded-3xl bg-gradient-to-br from-slate-900/90 via-slate-900/80 to-slate-950/90 transition-opacity duration-300 ${
+          isFlipped ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`}>
           {/* Top Bar */}
           <div className="flex items-center justify-between">
             <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5">
@@ -71,17 +73,23 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
             </button>
           </div>
 
-          {/* Bottom Flip Callout */}
+          {/* Bottom Show Answer Button Callout */}
           <div className="flex items-center justify-center text-xs text-slate-400 font-medium">
-            <span className="flex items-center gap-2 bg-slate-800/50 px-4 py-2 rounded-full border border-slate-700/50 text-slate-300">
-              <RotateCw className="w-3.5 h-3.5 text-slate-400 animate-spin-slow" />
-              Click or tap card to show answer
-            </span>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setIsFlipped(true); }}
+              className="flex items-center gap-2 bg-indigo-600/30 hover:bg-indigo-600/50 px-5 py-2.5 rounded-full border border-indigo-500/40 text-indigo-200 font-semibold shadow-lg transition active:scale-95"
+            >
+              <Eye className="w-4 h-4 text-indigo-400" />
+              Show Answer (Click or Tap)
+            </button>
           </div>
         </div>
 
         {/* BACK OF CARD */}
-        <div className="absolute inset-0 w-full h-full p-8 flex flex-col justify-between backface-hidden rotate-y-180 rounded-3xl bg-gradient-to-br from-slate-900/95 via-indigo-950/40 to-slate-950/95 border border-indigo-500/30">
+        <div className={`absolute inset-0 w-full h-full p-8 flex flex-col justify-between backface-hidden rotate-y-180 rounded-3xl bg-gradient-to-br from-slate-900/95 via-indigo-950/40 to-slate-950/95 border border-indigo-500/30 transition-opacity duration-300 ${
+          isFlipped ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}>
           {/* Top Bar */}
           <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
             <div className="flex items-center gap-3">
@@ -130,7 +138,7 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
           </div>
 
           {/* Flip Hint */}
-          <div className="text-center text-xs text-slate-500">
+          <div className="text-center text-xs text-slate-400">
             Select your recall strength below to schedule next review
           </div>
         </div>
@@ -141,7 +149,7 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
         <div className="mt-6 grid grid-cols-3 gap-3 animate-fade-in">
           <button
             onClick={() => onGradeCard(2)}
-            className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 hover:border-rose-500/60 transition-all duration-200 group active:scale-95"
+            className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 hover:border-rose-500/60 transition-all duration-200 group active:scale-95 cursor-pointer"
           >
             <span className="font-bold text-sm sm:text-base group-hover:scale-105 transition-transform">Hard</span>
             <span className="text-[11px] text-rose-300/70 mt-0.5">Reset / 1d</span>
@@ -149,7 +157,7 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
 
           <button
             onClick={() => onGradeCard(4)}
-            className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:border-indigo-500/60 transition-all duration-200 group active:scale-95"
+            className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:border-indigo-500/60 transition-all duration-200 group active:scale-95 cursor-pointer"
           >
             <span className="font-bold text-sm sm:text-base group-hover:scale-105 transition-transform">Good</span>
             <span className="text-[11px] text-indigo-300/70 mt-0.5">Standard</span>
@@ -157,7 +165,7 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
 
           <button
             onClick={() => onGradeCard(5)}
-            className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:border-emerald-500/60 transition-all duration-200 group active:scale-95"
+            className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:border-emerald-500/60 transition-all duration-200 group active:scale-95 cursor-pointer"
           >
             <span className="font-bold text-sm sm:text-base group-hover:scale-105 transition-transform">Easy</span>
             <span className="text-[11px] text-emerald-300/70 mt-0.5">Boost Interval</span>
