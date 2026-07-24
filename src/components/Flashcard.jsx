@@ -80,13 +80,13 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
           </div>
         ) : (
           /* BACK OF CARD (ANSWER REVEALED) */
-          <div className="flex flex-col justify-between flex-grow min-h-[180px]">
-            {/* Top Bar */}
-            <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-              <div className="flex items-center gap-2.5">
-                <h3 className="text-xl sm:text-2xl xl:text-3xl font-bold text-white">{card.word}</h3>
+          <div className="flex flex-col flex-grow min-h-[180px]">
+            {/* Top Bar — fixed at top */}
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-3 shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <h3 className="text-xl sm:text-2xl xl:text-3xl font-bold text-white truncate">{card.word}</h3>
                 {card.pronunciation && (
-                  <span className="text-xs sm:text-sm font-semibold text-indigo-300 font-mono bg-indigo-950/80 px-2.5 py-0.5 rounded-lg border border-indigo-800/50">
+                  <span className="text-xs sm:text-sm font-semibold text-indigo-300 font-mono bg-indigo-950/80 px-2.5 py-0.5 rounded-lg border border-indigo-800/50 shrink-0">
                     [{card.pronunciation}]
                   </span>
                 )}
@@ -95,21 +95,21 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
               <button
                 type="button"
                 onClick={speakWord}
-                className="p-2 rounded-full bg-slate-800 hover:bg-indigo-600/30 text-indigo-300 transition border border-slate-700"
+                className="p-2 rounded-full bg-slate-800 hover:bg-indigo-600/30 text-indigo-300 transition border border-slate-700 shrink-0 ml-2"
               >
                 <Volume2 className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            {/* Details Body */}
-            <div className="my-auto space-y-3 py-1.5">
+            {/* Details Body — flex-1 + overflow-y-auto so content scrolls, never pushing buttons off */}
+            <div className="flex-1 overflow-y-auto scrollbar-thin min-h-0 space-y-3 py-2">
               <div className="flex items-center gap-2">
                 <span className="px-2.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-bold uppercase tracking-wider">
                   {card.partOfSpeech || 'n/a'}
                 </span>
               </div>
 
-              <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-800 overflow-y-auto max-h-[85px] lg:max-h-[105px] xl:max-h-[160px] scrollbar-thin">
+              <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-800">
                 <p className="text-sm sm:text-base text-slate-100 leading-relaxed font-medium">
                   {card.definition}
                 </p>
@@ -128,8 +128,8 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
               </div>
             </div>
 
-            {/* SRS RATING BUTTONS (Shown inside card when flipped / answer revealed) */}
-            <div className="grid grid-cols-3 gap-2.5 pt-2">
+            {/* SRS RATING BUTTONS — always pinned at bottom, never clipped */}
+            <div className="grid grid-cols-3 gap-2.5 pt-2 shrink-0">
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); onGradeCard(2); }}
