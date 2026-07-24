@@ -76,3 +76,45 @@
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
+
+/* Custom responsive card & panel layout rules for different height monitors */
+.responsive-card {
+  height: 44vh;
+  min-height: 380px;
+  max-height: 460px;
+}
+
+.column-panel {
+  padding: 1rem;
+  gap: 0.75rem;
+}
+
+@media (max-height: 850px) {
+  .responsive-card {
+    height: auto;
+    min-height: 275px;
+    max-height: none;
+  }
+  
+  .column-panel {
+    padding: 0.75rem !important;
+    gap: 0.5rem !important;
+  }
+  
+  .nav-btn {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+    font-size: 10px !important;
+  }
+}
+
+@media (max-height: 720px) {
+  .responsive-card {
+    height: auto;
+    min-height: 235px;
+    padding: 1rem !important;
+  }
+  .responsive-card h2 {
+    font-size: 1.875rem !important; /* text-3xl */
+  }
+}

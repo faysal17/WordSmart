@@ -28,15 +28,15 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto my-1.5 space-y-3">
+    <div className="w-full max-w-xl mx-auto my-1">
       {/* CARD MAIN CONTAINER */}
-      <div
+      <div 
         onClick={() => setIsFlipped(!isFlipped)}
-        className="relative h-[34vh] min-h-[220px] lg:h-[38vh] lg:min-h-[250px] xl:h-[45vh] xl:min-h-[360px] xl:max-h-[420px] w-full rounded-3xl cursor-pointer transition-all duration-300 glass-card hover:border-indigo-500/50 hover:shadow-[0_0_40px_rgba(99,102,241,0.15)] flex flex-col justify-between overflow-hidden p-5 sm:p-6"
+        className="relative responsive-card w-full rounded-3xl cursor-pointer transition-all duration-300 glass-card hover:border-indigo-500/50 hover:shadow-[0_0_40px_rgba(99,102,241,0.15)] flex flex-col justify-between overflow-hidden p-5 sm:p-6"
       >
         {!isFlipped ? (
           /* FRONT OF CARD */
-          <div className="flex flex-col justify-between h-full min-h-[180px]">
+          <div className="flex flex-col justify-between flex-grow min-h-[180px]">
             {/* Top Bar */}
             <div className="flex items-center justify-between">
               <span className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 flex items-center gap-1.5">
@@ -80,7 +80,7 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
           </div>
         ) : (
           /* BACK OF CARD (ANSWER REVEALED) */
-          <div className="flex flex-col justify-between h-full min-h-[180px]">
+          <div className="flex flex-col justify-between flex-grow min-h-[180px]">
             {/* Top Bar */}
             <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
               <div className="flex items-center gap-2.5">
@@ -128,48 +128,38 @@ export default function Flashcard({ card, progress, onGradeCard, isFlipped, setI
               </div>
             </div>
 
-            {/* Hide / Flip Back Callout */}
-            <div className="flex items-center justify-center pt-1.5">
-              <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
-                <RotateCw className="w-3 h-3 text-indigo-400" />
-                Select your recall grade below to proceed
-              </span>
+            {/* SRS RATING BUTTONS (Shown inside card when flipped / answer revealed) */}
+            <div className="grid grid-cols-3 gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onGradeCard(2); }}
+                className="flex flex-col items-center justify-center py-2 px-1 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/40 hover:border-rose-500/70 transition-all duration-200 group active:scale-95 cursor-pointer shadow-md"
+              >
+                <span className="font-extrabold text-xs group-hover:scale-105 transition-transform">Hard</span>
+                <span className="text-[8px] text-rose-300/80 mt-0.5">Reset / 1d</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onGradeCard(4); }}
+                className="flex flex-col items-center justify-center py-2 px-1 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-200 border border-indigo-500/40 hover:border-indigo-500/70 transition-all duration-200 group active:scale-95 cursor-pointer shadow-md"
+              >
+                <span className="font-extrabold text-xs group-hover:scale-105 transition-transform">Good</span>
+                <span className="text-[8px] text-indigo-300/80 mt-0.5">Standard</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onGradeCard(5); }}
+                className="flex flex-col items-center justify-center py-2 px-1 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 hover:border-emerald-500/70 transition-all duration-200 group active:scale-95 cursor-pointer shadow-md"
+              >
+                <span className="font-extrabold text-xs group-hover:scale-105 transition-transform">Easy</span>
+                <span className="text-[8px] text-emerald-300/80 mt-0.5">Boost</span>
+              </button>
             </div>
           </div>
         )}
       </div>
-
-      {/* SRS RATING BUTTONS (Shown when card is flipped / answer revealed) */}
-      {isFlipped && (
-        <div className="grid grid-cols-3 gap-2.5 animate-fade-in">
-          <button
-            type="button"
-            onClick={() => onGradeCard(2)}
-            className="flex flex-col items-center justify-center p-2.5 sm:p-3.5 rounded-2xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/40 hover:border-rose-500/70 transition-all duration-200 group active:scale-95 cursor-pointer shadow-lg"
-          >
-            <span className="font-extrabold text-xs sm:text-sm group-hover:scale-105 transition-transform">Hard</span>
-            <span className="text-[9px] text-rose-300/80 mt-0.5">Reset / 1d</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onGradeCard(4)}
-            className="flex flex-col items-center justify-center p-2.5 sm:p-3.5 rounded-2xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-200 border border-indigo-500/40 hover:border-indigo-500/70 transition-all duration-200 group active:scale-95 cursor-pointer shadow-lg"
-          >
-            <span className="font-extrabold text-xs sm:text-sm group-hover:scale-105 transition-transform">Good</span>
-            <span className="text-[9px] text-indigo-300/80 mt-0.5">Standard</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => onGradeCard(5)}
-            className="flex flex-col items-center justify-center p-2.5 sm:p-3.5 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 hover:border-emerald-500/70 transition-all duration-200 group active:scale-95 cursor-pointer shadow-lg"
-          >
-            <span className="font-extrabold text-xs sm:text-sm group-hover:scale-105 transition-transform">Easy</span>
-            <span className="text-[9px] text-emerald-300/80 mt-0.5">Boost Interval</span>
-          </button>
-        </div>
-      )}
     </div>
   );
 }
