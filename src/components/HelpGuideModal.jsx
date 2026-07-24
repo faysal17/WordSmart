@@ -45,7 +45,7 @@ export default function HelpGuideModal({ isOpen, onClose }) {
       icon: Flame,
       iconColor: "text-amber-400 bg-amber-500/10 border-amber-500/20",
       bullets: [
-        { label: "Streak Tracker", desc: "Tracks your consecutive daily study sessions to help build consistency." },
+        { label: "Streak Tracker", desc: "Tracks consecutive daily study sessions. A card is officially 'Mastered' once its scheduled review interval reaches 21+ days." },
         { label: "Card Status Filters", desc: "Toggle between Due (scheduled reviews for today), New (unlearned words), or All (entire active set)." },
         { label: "Forgetting Curve Graph", desc: "An SVG retention curve that simulates your memory decay rate over a 7-day projection timeline using the SM-2 algorithm." }
       ]
