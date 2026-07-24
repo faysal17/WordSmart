@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Sparkles, Trophy, RotateCcw, AlertTriangle, CloudOff, Clock, CheckCircle, Flame, Brain, Lock } from 'lucide-react';
 import { loadVocabularyCSV } from './utils/csvParser';
 import { calculateSM2, sortCardsForStudySession, DEFAULT_SM2_CARD, getRequiredMasteryCountForChunk } from './utils/sm2';
@@ -49,6 +49,65 @@ export default function App() {
   const [sessionDeck, setSessionDeck] = useState([]);
   const [syncVersion, setSyncVersion] = useState(0);
   const [reviewedCardIds, setReviewedCardIds] = useState(new Set());
+
+  const navContainerRef = useRef(null);
+  const [scrollState, setScrollState] = useState({ showLeft: false, showRight: false });
+
+  // Calculate if the horizontal navigation bar is scrolled to the boundaries
+  const checkScrollLimits = () => {
+    const el = navContainerRef.current;
+    if (!el) return;
+    const showLeft = el.scrollLeft > 8;
+    const showRight = el.scrollLeft < el.scrollWidth - el.clientWidth - 8;
+    setScrollState({ showLeft, showRight });
+  };
+
+  useEffect(() => {
+    checkScrollLimits();
+    const timer = setTimeout(checkScrollLimits, 150);
+    return () => clearTimeout(timer);
+  }, [currentIndex, sessionDeck.length]);
+
+  // Auto-scroll the active card number to the center of the horizontal navigation tape
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (navContainerRef.current) {
+        const activeBtn = navContainerRef.current.querySelector('[data-active="true"]');
+        if (activeBtn) {
+          activeBtn.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'center'
+          });
+        }
+      }
+    }, 60); // small delay to let render updates finish, eliminating animation lag/jank
+    return () => clearTimeout(timer);
+  }, [currentIndex]);
+
+  // Get dynamic masking gradients so end buttons are never shadowed when fully scrolled
+  const getMaskStyle = () => {
+    const { showLeft, showRight } = scrollState;
+    if (showLeft && showRight) {
+      return {
+        maskImage: 'linear-gradient(to right, transparent, white 40px, white calc(100% - 40px), transparent)',
+        WebkitMaskImage: 'linear-gradient(to right, transparent, white 40px, white calc(100% - 40px), transparent)'
+      };
+    }
+    if (showLeft) {
+      return {
+        maskImage: 'linear-gradient(to right, transparent, white 40px)',
+        WebkitMaskImage: 'linear-gradient(to right, transparent, white 40px)'
+      };
+    }
+    if (showRight) {
+      return {
+        maskImage: 'linear-gradient(to right, white calc(100% - 40px), transparent)',
+        WebkitMaskImage: 'linear-gradient(to right, white calc(100% - 40px), transparent)'
+      };
+    }
+    return {};
+  };
 
   // Unlocked chunks (active learning progression)
   const [unlockedChunks, setUnlockedChunks] = useState(() => {
@@ -790,14 +849,20 @@ export default function App() {
                 </button>
               </div>
 
-              {/* Numbered card navigation buttons */}
-              <div className="flex flex-wrap items-center justify-center gap-1.5 py-1 w-full max-w-xl max-h-[50px] lg:max-h-[64px] overflow-y-auto pr-1 shrink-0 scrollbar-none">
+              {/* Numbered card navigation buttons (horizontal scrollable tape) */}
+              <div 
+                ref={navContainerRef}
+                onScroll={checkScrollLimits}
+                style={getMaskStyle()}
+                className="flex items-center gap-1.5 py-2 w-full max-w-xl overflow-x-auto pr-1 shrink-0 scrollbar-none flex-nowrap px-8"
+              >
                 {sessionDeck.map((_, idx) => {
                   const isCurrent = idx === currentIndex;
                   const isReviewed = reviewedCardIds.has(sessionDeck[idx].id);
                   return (
                     <button
                       key={idx}
+                      data-active={isCurrent}
                       onClick={() => {
                         setCurrentIndex(idx);
                         setIsFlipped(false);
