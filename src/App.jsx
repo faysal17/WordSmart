@@ -656,33 +656,94 @@ export default function App() {
             </div>
           ) : (
             <div className="p-8 rounded-3xl bg-slate-900/10 border border-slate-800/40 text-center space-y-4 max-w-md mx-auto my-auto shadow-xl shrink-0">
-              <div className="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto">
-                <Trophy className="w-7 h-7" />
-              </div>
-              <h3 className="text-lg font-bold text-white">All Cards Completed!</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                You have reviewed all cards in this chunk for today. Great job maintaining your recall!
-              </p>
-              
-              {nextAvailableChunk ? (
-                <div className="pt-3 border-t border-slate-800/80 mt-1 space-y-2.5">
-                  <p className="text-[11px] text-indigo-300 font-semibold leading-relaxed">
-                    You have finished studying all active cards. Ready to expand your learning?
+              {studyModeFilter === 'DUE' ? (
+                <>
+                  <div className="w-14 h-14 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center mx-auto">
+                    <Clock className="w-7 h-7" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">No Due Cards Today</h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    You have reviewed all spaced-repetition cards scheduled for today.
                   </p>
-                  <button
-                    onClick={handleUnlockNextChunk}
-                    className="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition"
-                  >
-                    Unlock & Add Chunk {nextAvailableChunk}
-                  </button>
-                </div>
+                  <div className="pt-3 border-t border-slate-800/80 mt-1 flex gap-2">
+                    <button
+                      onClick={() => setStudyModeFilter('NEW')}
+                      className="flex-1 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer"
+                    >
+                      Study New
+                    </button>
+                    <button
+                      onClick={() => setStudyModeFilter('ALL')}
+                      className="flex-1 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition cursor-pointer"
+                    >
+                      Show All
+                    </button>
+                  </div>
+                </>
+              ) : studyModeFilter === 'NEW' ? (
+                <>
+                  <div className="w-14 h-14 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center mx-auto">
+                    <Sparkles className="w-7 h-7" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">No New Cards Left</h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    You have introduced all vocabulary words in your active chunks.
+                  </p>
+                  
+                  {hasLearnedActiveWords && nextAvailableChunk ? (
+                    <div className="pt-3 border-t border-slate-800/80 mt-1 space-y-2">
+                      <p className="text-[11px] text-indigo-300 font-semibold leading-relaxed">
+                        Ready to expand your learning set?
+                      </p>
+                      <button
+                        onClick={handleUnlockNextChunk}
+                        className="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer"
+                      >
+                        Unlock Chunk {nextAvailableChunk}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="pt-3 border-t border-slate-800/80 mt-1">
+                      <button
+                        onClick={() => setStudyModeFilter('ALL')}
+                        className="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer"
+                      >
+                        Review Active Cards
+                      </button>
+                    </div>
+                  )}
+                </>
               ) : (
-                <button
-                  onClick={rebuildSessionDeck}
-                  className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 transition"
-                >
-                  Review Again
-                </button>
+                <>
+                  <div className="w-14 h-14 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto">
+                    <Trophy className="w-7 h-7" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">All Cards Completed!</h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    You have reviewed all cards in this chunk for today. Great job maintaining your recall!
+                  </p>
+                  
+                  {hasLearnedActiveWords && nextAvailableChunk ? (
+                    <div className="pt-3 border-t border-slate-800/80 mt-1 space-y-2.5">
+                      <p className="text-[11px] text-indigo-300 font-semibold leading-relaxed">
+                        You have finished studying all active cards. Ready to expand your learning?
+                      </p>
+                      <button
+                        onClick={handleUnlockNextChunk}
+                        className="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 transition cursor-pointer"
+                      >
+                        Unlock & Add Chunk {nextAvailableChunk}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={rebuildSessionDeck}
+                      className="w-full mt-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-lg shadow-indigo-600/30 transition cursor-pointer"
+                    >
+                      Review Again
+                    </button>
+                  )}
+                </>
               )}
             </div>
           )}
