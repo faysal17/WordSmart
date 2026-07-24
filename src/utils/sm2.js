@@ -33,6 +33,30 @@ export function calculateSM2(currentCard = DEFAULT_SM2_CARD, grade) {
   // Grade must be 0..5. Map rating: Hard=2, Good=4, Easy=5
   const q = Math.max(0, Math.min(5, grade));
 
+  // Check if the card has already been successfully reviewed today
+  const lastDate = currentCard.lastReviewedDate ? new Date(currentCard.lastReviewedDate) : null;
+  const today = new Date();
+  const isReviewedToday = lastDate && (
+    lastDate.getFullYear() === today.getFullYear() &&
+    lastDate.getMonth() === today.getMonth() &&
+    lastDate.getDate() === today.getDate()
+  );
+
+  // If successfully reviewed already today, rating again with Good/Easy should not compound the interval again
+  if (isReviewedToday && q >= 3) {
+    const nextDate = new Date(today);
+    nextDate.setDate(nextDate.getDate() + interval);
+
+    return {
+      repetitions,
+      interval,
+      easeFactor,
+      lastReviewedDate: today.toISOString(),
+      nextReviewDate: nextDate.toISOString(),
+      status: currentCard.status || 'review'
+    };
+  }
+
   // 1. Calculate new Ease Factor (EF)
   // EF' = EF + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))
   let newEF = easeFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
